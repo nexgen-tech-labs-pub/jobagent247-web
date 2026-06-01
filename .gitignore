@@ -42,3 +42,12 @@ yarn-error.log*
 
 # ── Misc ──────────────────────────────────────────────────────────────────────
 *.pem
+scripts/
+*.sh
+scripts/* 
+*.env
+*.env.local
+/jobagent247/* 
+*.env.local.example
+*.env.web.example
+.env.web
