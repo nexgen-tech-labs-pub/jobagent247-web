@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "bash scripts/start-web.sh",
+    "dev": "next dev",
     "dev:api": "bash scripts/start-api.sh",
     "dev:all": "bash scripts/dev.sh",
     "build": "next build",
