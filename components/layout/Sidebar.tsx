@@ -12,6 +12,8 @@ import {
   Settings,
   Zap,
   Bell,
+  Target,
+  BrainCircuit,
 } from 'lucide-react'
 
 const navItems = [
@@ -19,6 +21,8 @@ const navItems = [
   { label: 'My Profile', href: '/profile', icon: User },
   { label: 'CV Agent', href: '/cv-agent', icon: FileText },
   { label: 'Job Matches', href: '/job-matches', icon: Briefcase },
+  { label: 'Job Fit', href: '/job-fit', icon: Target },
+  { label: 'Career Intel', href: '/career-intelligence', icon: BrainCircuit },
   { label: 'Applications', href: '/applications', icon: CheckSquare },
   { label: 'Interview Prep', href: '/interview-prep', icon: MessageSquare },
   { label: 'Settings', href: '/settings', icon: Settings },

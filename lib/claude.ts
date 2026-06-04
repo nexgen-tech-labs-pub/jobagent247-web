@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import type { CVAnalysisResult, MatchResult, InterviewQuestion } from './types/database'
+import type { CVAnalysisResult, MatchResult, InterviewQuestion, ReadinessResult } from './types/database'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -270,6 +270,199 @@ const interviewQuestionsTool: Anthropic.Tool = {
     },
     required: ['questions'],
   },
+}
+
+const readinessTool: Anthropic.Tool = {
+  name: 'readiness_result',
+  description: 'Return a structured job readiness analysis with score breakdown, gap analysis, and recommendations',
+  input_schema: {
+    type: 'object' as const,
+    properties: {
+      overallScore: { type: 'number', description: 'Overall readiness score 0-100' },
+      readinessLevel: {
+        type: 'string',
+        enum: ['Ready', 'Partially Ready', 'Not Yet Ready'],
+        description: 'Ready: score >= 75, Partially Ready: score 50-74, Not Yet Ready: score < 50',
+      },
+      scoreBreakdown: {
+        type: 'object',
+        properties: {
+          technicalSkills: { type: 'number', description: '0-100: does the candidate have the required technical skills?' },
+          experienceMatch: { type: 'number', description: '0-100: does the candidate have the right years and seniority?' },
+          evidenceStrength: { type: 'number', description: '0-100: are skills backed by concrete achievements and metrics?' },
+          industryMatch: { type: 'number', description: '0-100: does the candidate have relevant domain or industry experience?' },
+          interviewReadiness: { type: 'number', description: '0-100: does the CV demonstrate the kind of impact stories needed for interviews?' },
+          profilePositioning: { type: 'number', description: '0-100: is the CV headline, summary, and structure optimised for this role?' },
+        },
+        required: ['technicalSkills', 'experienceMatch', 'evidenceStrength', 'industryMatch', 'interviewReadiness', 'profilePositioning'],
+      },
+      criticalGaps: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Gaps that will very likely block interviews — missing required skills or experience years',
+      },
+      importantGaps: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Gaps that will reduce interview probability but are not blockers',
+      },
+      niceToHaveGaps: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Gaps that are useful to fill but will not significantly affect interview rate',
+      },
+      strengths: {
+        type: 'array',
+        items: { type: 'string' },
+        description: '3-5 specific strengths backed by evidence in the CV',
+      },
+      recommendations: {
+        type: 'array',
+        items: { type: 'string' },
+        description: '4-6 specific, actionable improvement steps (e.g. "Add a Terraform project to your GitHub to evidence IaC skills")',
+      },
+      evidenceSummary: {
+        type: 'string',
+        description: '2-3 sentence summary of evidence quality in the CV',
+      },
+      summary: {
+        type: 'string',
+        description: '2-3 sentence plain English summary of overall readiness',
+      },
+    },
+    required: [
+      'overallScore', 'readinessLevel', 'scoreBreakdown',
+      'criticalGaps', 'importantGaps', 'niceToHaveGaps',
+      'strengths', 'recommendations', 'evidenceSummary', 'summary',
+    ],
+  },
+}
+
+export async function analyseReadiness(
+  cvText: string,
+  targetJobTitle: string,
+  targetSeniority: string | null,
+  targetGeography: string | null,
+  linkedinText: string | null,
+  portfolioLinks: string[]
+): Promise<ReadinessResult> {
+  const supplemental: string[] = []
+  if (linkedinText?.trim()) supplemental.push(`LinkedIn profile text:\n${linkedinText.trim()}`)
+  if (portfolioLinks.length > 0) supplemental.push(`Portfolio / GitHub links: ${portfolioLinks.join(', ')}`)
+
+  const seniorityLine = targetSeniority ? `Target seniority: ${targetSeniority}` : ''
+  const geoLine = targetGeography ? `Target geography / market: ${targetGeography}` : ''
+
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 2048,
+    system: [
+      {
+        type: 'text',
+        text: `You are a senior technical recruiter and career coach performing a deep readiness assessment.\n\nYour job:\n1. Extract the candidate's skills, evidence, achievements, and experience from their materials\n2. Model what this specific target role (title + seniority + geography) actually requires from the market\n3. Compare honestly and identify gaps\n4. Score across 6 dimensions 0-100\n5. Compute overallScore as the weighted average: technicalSkills 30%, experienceMatch 25%, evidenceStrength 20%, industryMatch 10%, interviewReadiness 10%, profilePositioning 5%\n\nReadiness level:\n- Ready: overallScore >= 75\n- Partially Ready: overallScore 50-74\n- Not Yet Ready: overallScore < 50\n\nEvidence strength scoring rules:\n- "worked with X" = score -10 (weak claim)\n- "built X" = score 0 (neutral)\n- "built X that achieved Y% improvement / £Z saving / N users" = score +10 (strong evidence)\n\nDo NOT guarantee interviews or hiring outcomes. Assess honestly.\n\nCandidate CV:\n${cvText}${supplemental.length > 0 ? '\n\n' + supplemental.join('\n\n') : ''}`,
+        cache_control: { type: 'ephemeral' },
+      },
+    ] as Anthropic.TextBlockParam[],
+    messages: [
+      {
+        role: 'user',
+        content: `Analyse this candidate's readiness for the following target role and use the readiness_result tool.\n\nTarget role: ${targetJobTitle}\n${seniorityLine}\n${geoLine}`.trim(),
+      },
+    ],
+    tools: [readinessTool],
+    tool_choice: { type: 'tool', name: 'readiness_result' },
+  })
+
+  const toolUse = response.content.find((b) => b.type === 'tool_use')
+  if (!toolUse || toolUse.type !== 'tool_use') {
+    throw new Error('Claude did not return a tool_use block')
+  }
+  return toolUse.input as ReadinessResult
+}
+
+const jobFitTool: Anthropic.Tool = {
+  name: 'job_fit_result',
+  description: 'Return a structured job fit analysis with score breakdown and actionable recommendations',
+  input_schema: {
+    type: 'object' as const,
+    properties: {
+      fitScore: { type: 'number', description: 'Overall fit score 0-100' },
+      matchCategory: {
+        type: 'string',
+        enum: ['Strong Match', 'Stretch Match', 'Low Probability Match'],
+      },
+      scoreBreakdown: {
+        type: 'object',
+        properties: {
+          technicalSkillsMatch: { type: 'number' },
+          experienceSeniorityMatch: { type: 'number' },
+          evidenceStrength: { type: 'number' },
+          domainIndustryMatch: { type: 'number' },
+          locationRemoteCompatibility: { type: 'number' },
+          salaryCompatibility: { type: 'number' },
+          visaWorkAuthorizationCompatibility: { type: 'number' },
+          roleTrajectoryFit: { type: 'number' },
+        },
+        required: [
+          'technicalSkillsMatch', 'experienceSeniorityMatch', 'evidenceStrength',
+          'domainIndustryMatch', 'locationRemoteCompatibility', 'salaryCompatibility',
+          'visaWorkAuthorizationCompatibility', 'roleTrajectoryFit',
+        ],
+      },
+      strengths: { type: 'array', items: { type: 'string' }, description: '3-5 specific strengths' },
+      risks: { type: 'array', items: { type: 'string' }, description: '2-4 risks or concerns' },
+      missingSkills: { type: 'array', items: { type: 'string' } },
+      evidenceGaps: { type: 'array', items: { type: 'string' }, description: 'Areas where candidate claims skills but lacks concrete evidence' },
+      locationNotes: { type: 'string' },
+      salaryNotes: { type: 'string' },
+      visaNotes: { type: 'string' },
+      recommendedNextAction: { type: 'string' },
+      applicationStrategy: { type: 'string' },
+      summary: { type: 'string', description: '2-3 sentence plain English summary' },
+    },
+    required: [
+      'fitScore', 'matchCategory', 'scoreBreakdown', 'strengths', 'risks',
+      'missingSkills', 'evidenceGaps', 'locationNotes', 'salaryNotes', 'visaNotes',
+      'recommendedNextAction', 'applicationStrategy', 'summary',
+    ],
+  },
+}
+
+export async function analyseJobFit(
+  cvText: string,
+  jobDescription: string,
+  jobTitle: string,
+  userProfile?: { location?: string | null; visa_required?: boolean; job_type_pref?: string | null }
+): Promise<import('./types/database').JobFitResult> {
+  const profileContext = userProfile
+    ? `\nCandidate location preference: ${userProfile.location ?? 'not specified'}\nVisa sponsorship required: ${userProfile.visa_required ? 'yes' : 'no'}\nJob type preference: ${userProfile.job_type_pref ?? 'not specified'}`
+    : ''
+
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 2048,
+    system: [
+      {
+        type: 'text',
+        text: `You are a senior technical recruiter and career coach evaluating candidate fit for a specific role.\n\nEvaluate evidence strength carefully — "worked with X" is weak evidence; "built X achieving Y% improvement" is strong evidence.\n\nScore each dimension 0-100. Set fitScore to the weighted average:\n- technicalSkillsMatch: 25%\n- experienceSeniorityMatch: 20%\n- evidenceStrength: 15%\n- domainIndustryMatch: 10%\n- locationRemoteCompatibility: 10%\n- salaryCompatibility: 5%\n- visaWorkAuthorizationCompatibility: 10%\n- roleTrajectoryFit: 5%\n\nMatchCategory rules:\n- Strong Match: fitScore >= 75\n- Stretch Match: fitScore 55-74\n- Low Probability Match: fitScore < 55\n\nCandidate CV:\n${cvText}${profileContext}`,
+        cache_control: { type: 'ephemeral' },
+      },
+    ] as Anthropic.TextBlockParam[],
+    messages: [
+      {
+        role: 'user',
+        content: `Analyse this candidate's fit for the following role and use the job_fit_result tool.\n\nRole: ${jobTitle}\n\nJob Description:\n${jobDescription}`,
+      },
+    ],
+    tools: [jobFitTool],
+    tool_choice: { type: 'tool', name: 'job_fit_result' },
+  })
+
+  const toolUse = response.content.find((b) => b.type === 'tool_use')
+  if (!toolUse || toolUse.type !== 'tool_use') {
+    throw new Error('Claude did not return a tool_use block')
+  }
+  return toolUse.input as import('./types/database').JobFitResult
 }
 
 export async function generateInterviewQuestions(

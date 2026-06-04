@@ -3,6 +3,7 @@ export interface ScrapeJobPayload {
   user_id: string
   keywords: string[]
   location: string
+  locale: string
   job_type: string
   visa_required: boolean
   sites: string[]

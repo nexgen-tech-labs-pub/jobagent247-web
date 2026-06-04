@@ -47,7 +47,6 @@ scripts/
 scripts/* 
 *.env
 *.env.local
-/jobagent247/* 
-*.env.local.example
+*.env.api.example
 *.env.web.example
-.env.web
+

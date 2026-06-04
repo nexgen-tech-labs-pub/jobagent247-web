@@ -40,7 +40,6 @@ export async function GET(request: NextRequest) {
   let query = supabase
     .from('jobs')
     .select('*, user_jobs!left(id, match_score, status)', { count: 'exact' })
-    .eq('user_jobs.user_id', user.id)
     .range(offset, offset + limit - 1)
     .order('posted_date', { ascending: false })
 

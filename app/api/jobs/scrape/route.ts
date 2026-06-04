@@ -12,10 +12,19 @@ export async function POST(request: NextRequest) {
   const body = await request.json() as {
     keywords: string[]
     location: string
+    locale?: string
     job_type?: string
     visa_required?: boolean
     sites?: string[]
   }
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('location_pref')
+    .eq('id', user.id)
+    .single()
+
+  const locale = body.locale ?? profile?.location_pref ?? ''
 
   const { data: scrapeJob, error } = await supabase
     .from('scrape_jobs')
@@ -24,6 +33,7 @@ export async function POST(request: NextRequest) {
       search_criteria: {
         keywords: body.keywords,
         location: body.location,
+        locale,
         job_type: body.job_type ?? '',
         visa_required: body.visa_required ?? false,
       },
@@ -44,6 +54,7 @@ export async function POST(request: NextRequest) {
       user_id: user.id,
       keywords: body.keywords,
       location: body.location,
+      locale,
       job_type: body.job_type ?? '',
       visa_required: body.visa_required ?? false,
       sites: body.sites ?? [],

@@ -141,6 +141,134 @@ export interface MatchResult {
   verdict: string
 }
 
+export interface ScoreBreakdown {
+  technicalSkillsMatch: number
+  experienceSeniorityMatch: number
+  evidenceStrength: number
+  domainIndustryMatch: number
+  locationRemoteCompatibility: number
+  salaryCompatibility: number
+  visaWorkAuthorizationCompatibility: number
+  roleTrajectoryFit: number
+}
+
+export type MatchCategory = 'Strong Match' | 'Stretch Match' | 'Low Probability Match'
+export type UserFeedback = 'accurate' | 'too_high' | 'too_low' | 'not_relevant'
+export type ApplicationOutcome = 'not_applied' | 'applied' | 'interview' | 'rejected' | 'offer' | 'no_response'
+
+export interface JobFitResult {
+  fitScore: number
+  matchCategory: MatchCategory
+  scoreBreakdown: ScoreBreakdown
+  strengths: string[]
+  risks: string[]
+  missingSkills: string[]
+  evidenceGaps: string[]
+  locationNotes: string
+  salaryNotes: string
+  visaNotes: string
+  recommendedNextAction: string
+  applicationStrategy: string
+  summary: string
+}
+
+export interface SavedJob {
+  id: string
+  user_id: string
+  job_title: string
+  company_name: string | null
+  job_url: string | null
+  job_description: string
+  location: string | null
+  salary_range: string | null
+  work_mode: string | null
+  employment_type: string | null
+  source: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface JobFitAnalysis {
+  id: string
+  user_id: string
+  saved_job_id: string
+  fit_score: number
+  match_category: MatchCategory
+  score_breakdown: ScoreBreakdown
+  strengths: string[]
+  risks: string[]
+  missing_skills: string[]
+  evidence_gaps: string[]
+  location_notes: string | null
+  salary_notes: string | null
+  visa_notes: string | null
+  recommended_next_action: string | null
+  application_strategy: string | null
+  summary: string | null
+  raw_ai_output: JobFitResult | null
+  created_at: string
+}
+
+export interface JobFitFeedback {
+  id: string
+  user_id: string
+  job_fit_analysis_id: string
+  user_feedback: UserFeedback | null
+  application_outcome: ApplicationOutcome | null
+  notes: string | null
+  created_at: string
+}
+
+export interface JobFitAnalysisWithJob extends JobFitAnalysis {
+  saved_job: SavedJob
+}
+
+export interface ReadinessScoreBreakdown {
+  technicalSkills: number
+  experienceMatch: number
+  evidenceStrength: number
+  industryMatch: number
+  interviewReadiness: number
+  profilePositioning: number
+}
+
+export type ReadinessLevel = 'Ready' | 'Partially Ready' | 'Not Yet Ready'
+
+export interface ReadinessResult {
+  overallScore: number
+  readinessLevel: ReadinessLevel
+  scoreBreakdown: ReadinessScoreBreakdown
+  criticalGaps: string[]
+  importantGaps: string[]
+  niceToHaveGaps: string[]
+  strengths: string[]
+  recommendations: string[]
+  evidenceSummary: string | null
+  summary: string
+}
+
+export interface ReadinessAnalysis {
+  id: string
+  user_id: string
+  target_job_title: string
+  target_seniority: string | null
+  target_geography: string | null
+  linkedin_text: string | null
+  portfolio_links: string[]
+  overall_score: number
+  readiness_level: ReadinessLevel
+  score_breakdown: ReadinessScoreBreakdown
+  critical_gaps: string[]
+  important_gaps: string[]
+  nice_to_have_gaps: string[]
+  strengths: string[]
+  recommendations: string[]
+  evidence_summary: string | null
+  summary: string | null
+  raw_ai_output: ReadinessResult | null
+  created_at: string
+}
+
 type TableDef<Row, Insert, Update> = {
   Row: Row
   Insert: Insert
@@ -159,6 +287,10 @@ export interface Database {
       documents: TableDef<Document, Omit<Document, 'id' | 'created_at'>, Partial<Omit<Document, 'id'>>>
       interview_sessions: TableDef<InterviewSession, Omit<InterviewSession, 'id' | 'created_at'>, Partial<Omit<InterviewSession, 'id'>>>
       scrape_jobs: TableDef<ScrapeJob, Omit<ScrapeJob, 'id' | 'created_at'>, Partial<Omit<ScrapeJob, 'id'>>>
+      saved_jobs: TableDef<SavedJob, Omit<SavedJob, 'id' | 'created_at' | 'updated_at'>, Partial<Omit<SavedJob, 'id'>>>
+      job_fit_analyses: TableDef<JobFitAnalysis, Omit<JobFitAnalysis, 'id' | 'created_at'>, Partial<Omit<JobFitAnalysis, 'id'>>>
+      job_fit_feedback: TableDef<JobFitFeedback, Omit<JobFitFeedback, 'id' | 'created_at'>, Partial<Omit<JobFitFeedback, 'id'>>>
+      readiness_analyses: TableDef<ReadinessAnalysis, Omit<ReadinessAnalysis, 'id' | 'created_at'>, Partial<Omit<ReadinessAnalysis, 'id'>>>
     }
     Views: Record<string, never>
     Functions: Record<string, never>
