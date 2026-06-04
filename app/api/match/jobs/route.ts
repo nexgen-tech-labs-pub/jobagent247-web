@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   try {
     const result = await searchJobs(supabase, user.id, { keywords: keyword, type, visa, page, limit })
     return NextResponse.json(result)
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

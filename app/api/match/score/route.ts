@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     await upsertUserJobScore(supabase, user.id, body.jobId, result.score)
 
     return NextResponse.json({ ...result, remaining })
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

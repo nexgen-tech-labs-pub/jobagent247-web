@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { Zap, Eye, EyeOff, Loader2, Check } from 'lucide-react'
 import { GradientButton } from '@/components/ui/GradientButton'
 import { getBrowserClient } from '@/lib/supabase-browser'
@@ -14,8 +13,6 @@ const passwordChecks = [
 ]
 
 export default function SignupPage() {
-  const router = useRouter()
-
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)

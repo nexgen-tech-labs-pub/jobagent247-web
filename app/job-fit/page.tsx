@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { GradientButton } from '@/components/ui/GradientButton'
@@ -355,20 +355,21 @@ export default function JobFitPage() {
   const [savedAnalyses, setSavedAnalyses] = useState<JobFitAnalysisWithJob[]>([])
   const [loadingList, setLoadingList] = useState(false)
 
-  const loadSaved = useCallback(async () => {
-    setLoadingList(true)
-    try {
-      const res = await fetch('/api/jobs/fit/list')
-      if (res.ok) {
-        const data = await res.json() as JobFitAnalysisWithJob[]
-        setSavedAnalyses(data)
+  useEffect(() => {
+    async function load() {
+      setLoadingList(true)
+      try {
+        const res = await fetch('/api/jobs/fit/list')
+        if (res.ok) {
+          const data = await res.json() as JobFitAnalysisWithJob[]
+          setSavedAnalyses(data)
+        }
+      } finally {
+        setLoadingList(false)
       }
-    } finally {
-      setLoadingList(false)
     }
+    void load()
   }, [])
-
-  useEffect(() => { void loadSaved() }, [loadSaved])
 
   const handleAnalyse = async () => {
     if (!jobTitle.trim() || !jobDescription.trim()) {

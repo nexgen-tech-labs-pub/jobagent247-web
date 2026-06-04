@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { getUserPlan, getUser } from '@/lib/db/users'
+import { getUserPlan } from '@/lib/db/users'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { analyseReadiness } from '@/lib/claude'
 import { saveReadinessAnalysis } from '@/lib/db/readiness'

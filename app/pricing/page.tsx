@@ -1,5 +1,4 @@
 import { Navbar } from '@/components/layout/Navbar'
-import { GlassCard } from '@/components/ui/GlassCard'
 import { GradientButton } from '@/components/ui/GradientButton'
 import { SecondaryButton } from '@/components/ui/SecondaryButton'
 import { SectionHeader } from '@/components/ui/SectionHeader'

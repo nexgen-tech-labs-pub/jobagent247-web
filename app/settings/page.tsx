@@ -7,7 +7,7 @@ import { GradientButton } from '@/components/ui/GradientButton'
 import { SecondaryButton } from '@/components/ui/SecondaryButton'
 import { mockUserProfile } from '@/lib/mock-data'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Check, Zap, Shield, Bell } from 'lucide-react'
+import { Check, Zap, Shield } from 'lucide-react'
 
 export default function SettingsPage() {
   const [saved, setSaved] = useState(false)

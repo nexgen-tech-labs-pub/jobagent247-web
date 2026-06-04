@@ -21,7 +21,7 @@ function readStoredTheme(): Theme {
   if (typeof window === 'undefined') return 'dark'
   try {
     return localStorage.getItem('theme') === 'light' ? 'light' : 'dark'
-  } catch (_) {
+  } catch {
     return 'dark'
   }
 }
@@ -37,7 +37,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   function toggleTheme() {
     setTheme((prev) => {
       const next: Theme = prev === 'dark' ? 'light' : 'dark'
-      try { localStorage.setItem('theme', next) } catch (_) {}
+      try { localStorage.setItem('theme', next) } catch {}
       document.documentElement.classList.remove('light', 'dark')
       document.documentElement.classList.add(next)
       return next

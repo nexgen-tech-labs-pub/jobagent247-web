@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const plan = await getUserPlan(supabase, user.id)
-    const { allowed, remaining } = await checkRateLimit(user.id, plan)
+    const { allowed } = await checkRateLimit(user.id, plan)
     if (!allowed) {
       return NextResponse.json({ error: 'Daily limit reached. Upgrade for more.', remaining: 0 }, { status: 429 })
     }
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     )
 
     return NextResponse.json(results.map(({ jobId, score, verdict }) => ({ jobId, score, verdict })))
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { GlassCard } from '@/components/ui/GlassCard'
-import { StatusBadge } from '@/components/ui/StatusBadge'
 import { getBrowserClient } from '@/lib/supabase-browser'
 import type { UserJobWithJob, ApplicationStatus } from '@/lib/types/database'
 import { Building2, Calendar, MapPin, Trash2, ChevronDown, Check, X, Plus } from 'lucide-react'
