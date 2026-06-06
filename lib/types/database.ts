@@ -83,7 +83,7 @@ export interface Document {
 export interface InterviewQuestion {
   id: string
   question: string
-  category: 'Technical' | 'Behavioural' | 'SRE' | 'Leadership' | 'Cloud' | 'Situational'
+  category: 'Technical' | 'Behavioural' | 'SRE' | 'Leadership' | 'Cloud' | 'Situational' | 'Scenario' | 'Culture'
   difficulty: 'easy' | 'medium' | 'hard'
   starFramework: {
     situation: string
@@ -100,6 +100,69 @@ export interface InterviewSession {
   job_id: string | null
   questions: InterviewQuestion[]
   created_at: string
+}
+
+export interface InterviewKitResult {
+  summary: string
+  likelyInterviewStages: string[]
+  questions: InterviewQuestion[]
+  candidateRiskAreas: string[]
+  revisionTopics: string[]
+  questionsToAskEmployer: string[]
+  finalChecklist: string[]
+}
+
+export interface InterviewKit {
+  id: string
+  user_id: string
+  company_name: string | null
+  job_description: string
+  target_role: string
+  interview_type: string
+  geography: string
+  summary: string | null
+  likely_interview_stages: string[]
+  questions: InterviewQuestion[]
+  candidate_risk_areas: string[]
+  revision_topics: string[]
+  questions_to_ask_employer: string[]
+  final_checklist: string[]
+  raw_ai_output: InterviewKitResult | null
+  created_at: string
+}
+
+export interface MockInterviewResponse {
+  question_id: string
+  question: string
+  category: string
+  answer: string
+  score: number
+  strengths: string[]
+  weaknesses: string[]
+  feedback: string
+  improved_answer_structure: string
+  created_at: string
+}
+
+export interface MockInterviewSession {
+  id: string
+  user_id: string
+  interview_kit_id: string
+  status: 'active' | 'completed'
+  current_question_index: number
+  responses: MockInterviewResponse[]
+  overall_score: number | null
+  feedback_summary: string | null
+  created_at: string
+  completed_at: string | null
+}
+
+export interface MockEvalResult {
+  score: number
+  strengths: string[]
+  weaknesses: string[]
+  feedback: string
+  improvedAnswerStructure: string
 }
 
 export interface ScrapeJob {
@@ -291,6 +354,8 @@ export interface Database {
       job_fit_analyses: TableDef<JobFitAnalysis, Omit<JobFitAnalysis, 'id' | 'created_at'>, Partial<Omit<JobFitAnalysis, 'id'>>>
       job_fit_feedback: TableDef<JobFitFeedback, Omit<JobFitFeedback, 'id' | 'created_at'>, Partial<Omit<JobFitFeedback, 'id'>>>
       readiness_analyses: TableDef<ReadinessAnalysis, Omit<ReadinessAnalysis, 'id' | 'created_at'>, Partial<Omit<ReadinessAnalysis, 'id'>>>
+      interview_kits: TableDef<InterviewKit, Omit<InterviewKit, 'id' | 'created_at'>, Partial<Omit<InterviewKit, 'id'>>>
+      mock_interview_sessions: TableDef<MockInterviewSession, Omit<MockInterviewSession, 'id' | 'created_at' | 'completed_at'>, Partial<Omit<MockInterviewSession, 'id'>>>
     }
     Views: Record<string, never>
     Functions: Record<string, never>

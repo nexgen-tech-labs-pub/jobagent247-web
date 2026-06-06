@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import type { CVAnalysisResult, MatchResult, InterviewQuestion, ReadinessResult } from './types/database'
+import type { CVAnalysisResult, MatchResult, InterviewQuestion, InterviewKitResult, MockEvalResult, ReadinessResult } from './types/database'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -232,6 +232,87 @@ export async function generateRecruiterMessage(
   const textBlock = response.content.find((b) => b.type === 'text')
   if (!textBlock || textBlock.type !== 'text') throw new Error('Claude did not return text')
   return textBlock.text
+}
+
+const interviewKitTool: Anthropic.Tool = {
+  name: 'interview_kit_result',
+  description: 'Return a complete interview preparation kit with 25+ questions, STAR guidance, risk areas, and checklist',
+  input_schema: {
+    type: 'object' as const,
+    properties: {
+      summary: { type: 'string', description: 'Brief summary of the role and key interview themes (2-3 sentences)' },
+      likelyInterviewStages: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Likely interview stages in order e.g. "HR screen", "Technical interview", "Hiring manager"',
+      },
+      questions: {
+        type: 'array',
+        description: 'Minimum 25 questions distributed across categories',
+        items: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            question: { type: 'string' },
+            category: {
+              type: 'string',
+              enum: ['Technical', 'Behavioural', 'Leadership', 'Scenario', 'Culture', 'SRE', 'Cloud', 'Situational'],
+            },
+            difficulty: { type: 'string', enum: ['easy', 'medium', 'hard'] },
+            starFramework: {
+              type: 'object',
+              properties: {
+                situation: { type: 'string' },
+                task: { type: 'string' },
+                action: { type: 'string' },
+                result: { type: 'string' },
+              },
+              required: ['situation', 'task', 'action', 'result'],
+            },
+            keywordsToUse: { type: 'array', items: { type: 'string' } },
+          },
+          required: ['id', 'question', 'category', 'difficulty', 'starFramework', 'keywordsToUse'],
+        },
+      },
+      candidateRiskAreas: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Specific weaknesses or gaps in the CV that will likely be probed at interview',
+      },
+      revisionTopics: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Technical topics, tools, or concepts to revise before the interview',
+      },
+      questionsToAskEmployer: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Smart questions the candidate should ask the interviewer',
+      },
+      finalChecklist: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Preparation checklist items to complete before interview day',
+      },
+    },
+    required: ['summary', 'likelyInterviewStages', 'questions', 'candidateRiskAreas', 'revisionTopics', 'questionsToAskEmployer', 'finalChecklist'],
+  },
+}
+
+const mockEvalTool: Anthropic.Tool = {
+  name: 'mock_eval_result',
+  description: 'Evaluate a candidate answer in a mock interview and return structured coaching feedback',
+  input_schema: {
+    type: 'object' as const,
+    properties: {
+      score: { type: 'number', description: '0-100 score for this answer' },
+      strengths: { type: 'array', items: { type: 'string' }, description: 'What the candidate did well' },
+      weaknesses: { type: 'array', items: { type: 'string' }, description: 'What was missing or weak' },
+      feedback: { type: 'string', description: 'One paragraph of coaching feedback' },
+      improvedAnswerStructure: { type: 'string', description: 'A stronger version of the answer the candidate should aim for' },
+    },
+    required: ['score', 'strengths', 'weaknesses', 'feedback', 'improvedAnswerStructure'],
+  },
 }
 
 const interviewQuestionsTool: Anthropic.Tool = {
@@ -509,4 +590,72 @@ export async function generateInterviewQuestions(
     throw new Error('Claude returned malformed question objects')
   }
   return rawInput.questions as InterviewQuestion[]
+}
+
+export async function generateInterviewKit(
+  cvText: string,
+  jobDescription: string,
+  targetRole: string,
+  company: string,
+  interviewType: string,
+  geography: string
+): Promise<InterviewKitResult> {
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 8192,
+    system: [
+      {
+        type: 'text',
+        text: `You are an expert interview coach preparing a candidate for a specific role.\nGenerate a comprehensive interview preparation kit of at least 25 questions.\nAll STAR framework guidance must reference real experience from the candidate's CV — never invent experience.\nIf the CV lacks evidence for a question area, note this in candidateRiskAreas and suggest how to prepare an honest answer.\n\nCandidate CV:\n${cvText}`,
+        cache_control: { type: 'ephemeral' },
+      },
+    ] as Anthropic.TextBlockParam[],
+    messages: [
+      {
+        role: 'user',
+        content: `Prepare a full interview kit for this candidate.\n\nRole: ${targetRole}\nCompany: ${company || 'the company'}\nInterview type focus: ${interviewType}\nGeography: ${geography}\n\nJob Description:\n${jobDescription}\n\nGenerate at least 25 questions distributed across: Technical (30%), Behavioural (25%), Leadership (15%), Scenario (15%), Culture (15%).\nAssign each question a unique id: q1 through q25 (or more).\nUse the interview_kit_result tool.`,
+      },
+    ],
+    tools: [interviewKitTool],
+    tool_choice: { type: 'tool', name: 'interview_kit_result' },
+  })
+
+  const toolUse = response.content.find((b) => b.type === 'tool_use')
+  if (!toolUse || toolUse.type !== 'tool_use') {
+    throw new Error('Claude did not return a tool_use block')
+  }
+  return toolUse.input as InterviewKitResult
+}
+
+export async function evaluateMockAnswer(
+  question: string,
+  category: string,
+  answer: string,
+  jobDescription: string
+): Promise<MockEvalResult> {
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 1024,
+    system: [
+      {
+        type: 'text',
+        text: 'You are an expert interview coach evaluating mock interview answers. Score honestly 0-100. Provide specific, actionable coaching feedback.',
+        cache_control: { type: 'ephemeral' },
+      },
+    ] as Anthropic.TextBlockParam[],
+    messages: [
+      {
+        role: 'user',
+        content: `Job context (first 1000 chars):\n${jobDescription.slice(0, 1000)}\n\nQuestion (${category}): ${question}\n\nCandidate's answer: ${answer || '(no answer provided)'}\n\nEvaluate the answer and use the mock_eval_result tool.`,
+      },
+    ],
+    tools: [mockEvalTool],
+    tool_choice: { type: 'tool', name: 'mock_eval_result' },
+  })
+
+  const toolUse = response.content.find((b) => b.type === 'tool_use')
+  if (!toolUse || toolUse.type !== 'tool_use') {
+    throw new Error('Claude did not return a tool_use block')
+  }
+  return toolUse.input as MockEvalResult
 }
