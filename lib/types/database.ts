@@ -51,6 +51,7 @@ export interface Job {
   category: string | null
   scraped_at: string
   expires_at: string | null
+  apify_run_id: string | null
 }
 
 export interface UserJob {

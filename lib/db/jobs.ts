@@ -124,3 +124,22 @@ export async function upsertUserJobScore(
     )
   if (error) throw error
 }
+
+export async function upsertApifyJob(
+  db: Client,
+  job: Partial<Omit<Job, 'id' | 'url' | 'title' | 'scraped_at'>> & { url: string; title: string; scraped_at: string }
+): Promise<void> {
+  const { error } = await db
+    .from('jobs')
+    .upsert(job, { onConflict: 'url', ignoreDuplicates: false })
+  if (error) throw error
+}
+
+export async function getJobsByIds(db: Client, ids: string[]): Promise<Job[]> {
+  const { data, error } = await db
+    .from('jobs')
+    .select('*')
+    .in('id', ids)
+  if (error) throw error
+  return (data ?? []) as Job[]
+}

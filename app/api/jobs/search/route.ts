@@ -29,6 +29,23 @@ export async function GET(request: NextRequest) {
   const limit     = Math.min(50, Math.max(1, parseInt(sp.get('limit') ?? '20', 10)))
   const offset    = (page - 1) * limit
 
+  const idsParam = sp.get('ids')
+  if (idsParam) {
+    const ids = idsParam.split(',').map(s => s.trim()).filter(Boolean).slice(0, 5)
+    if (ids.length === 0) return NextResponse.json({ error: 'ids parameter is empty' }, { status: 400 })
+    const { data, error } = await supabase
+      .from('jobs')
+      .select('*, user_jobs!left(id, match_score, status)')
+      .in('id', ids)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    const jobs = (data ?? []).map(j => {
+      const userJobs = Array.isArray(j.user_jobs) ? j.user_jobs as UserJobRow[] : []
+      const uj = userJobs[0] ?? null
+      return { ...j, user_jobs: undefined, match_score: uj?.match_score ?? null, saved_status: uj?.status ?? null, user_job_id: uj?.id ?? null }
+    })
+    return NextResponse.json({ jobs, total: jobs.length, page: 1 })
+  }
+
   const cacheKey = `jobs:search:${user.id}:${keywords}:${location}:${type}:${visa}:${minScore}:${page}:${limit}`
   try {
     const cached = await getRedis().get(cacheKey)
@@ -41,7 +58,8 @@ export async function GET(request: NextRequest) {
     .from('jobs')
     .select('*, user_jobs!left(id, match_score, status)', { count: 'exact' })
     .range(offset, offset + limit - 1)
-    .order('posted_date', { ascending: false })
+    .order('posted_date', { ascending: false, nullsFirst: false })
+    .order('scraped_at', { ascending: false })
 
   if (keywords) query = query.or(`title.ilike.%${keywords}%,description.ilike.%${keywords}%`)
   if (location) query = query.ilike('location', `%${location}%`)
