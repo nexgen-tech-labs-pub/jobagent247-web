@@ -126,7 +126,7 @@ export default function JobMatchesPage() {
     setLoading(false)
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void loadJobs() }, [])
 
   const stopPolling = () => {

@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { getUser } from '@/lib/db/users'
 import { triggerApifyRun } from '@/lib/apify'
 
 const logger = console  // swap for Sentry logger in Phase 5
 
-export async function POST(_req: NextRequest) {
+export async function POST() {
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

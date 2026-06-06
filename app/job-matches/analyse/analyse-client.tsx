@@ -360,11 +360,10 @@ export default function AnalyseClient({ jobIds }: { jobIds: string[] }) {
     const controller = new AbortController()
     const { signal } = controller
 
-    const init: Record<string, AnalysisState> = {}
-    jobIds.forEach(id => { init[id] = { status: 'pending' } })
-    setAnalyses(init)
-
     void (async () => {
+      const init: Record<string, AnalysisState> = {}
+      jobIds.forEach(id => { init[id] = { status: 'pending' } })
+      setAnalyses(init)
       setLoadingJobs(true)
       const res = await fetch(`/api/jobs/search?ids=${jobIds.join(',')}`, { signal })
       if (!res.ok) { setLoadingJobs(false); return }
