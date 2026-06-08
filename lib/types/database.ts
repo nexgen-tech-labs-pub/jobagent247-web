@@ -17,6 +17,9 @@ export interface User {
   keywords: string[] | null
   onboarding_complete: boolean
   plan: 'free' | 'pro' | 'accelerator'
+  stripe_customer_id: string | null
+  paddle_customer_id: string | null
+  locale: 'uk' | 'in'
   created_at: string
 }
 

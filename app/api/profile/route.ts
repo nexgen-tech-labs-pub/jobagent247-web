@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import * as Sentry from '@sentry/nextjs'
 import { createServerClient } from '@/lib/supabase'
 import { getUser, upsertUser, updateUser } from '@/lib/db/users'
 import type { User } from '@/lib/types/database'
@@ -27,13 +28,16 @@ export async function GET() {
         keywords: null,
         onboarding_complete: false,
         plan: 'free',
+        stripe_customer_id: null,
+        paddle_customer_id: null,
+        locale: 'uk',
       })
       return NextResponse.json(created)
     }
 
     return NextResponse.json(profile)
   } catch (err) {
-    console.error('[GET /api/profile]', err)
+    Sentry.captureException(err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -49,7 +53,7 @@ export async function PUT(request: NextRequest) {
     const updated = await updateUser(supabase, authUser.id, body)
     return NextResponse.json(updated)
   } catch (err) {
-    console.error('[PUT /api/profile]', err)
+    Sentry.captureException(err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

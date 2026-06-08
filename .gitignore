@@ -50,3 +50,5 @@ scripts/*
 *.env.api.example
 *.env.web.example
 
+CLAUDE.md
+AGENTS.md

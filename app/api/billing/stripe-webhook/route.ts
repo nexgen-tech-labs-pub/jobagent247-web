@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   try {
     event = getStripe().webhooks.constructEvent(body, sig, secret)
   } catch (err) {
-    logger.error('[billing/webhook] Signature verification failed:', err)
+    logger.error('[billing/stripe-webhook] Signature verification failed:', err)
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
@@ -43,15 +43,15 @@ export async function POST(req: NextRequest) {
 
       if (error) {
         Sentry.captureException(error, { extra: { event: event.type, customerId } })
-        logger.error('[billing/webhook] DB update failed:', error)
+        logger.error('[billing/stripe-webhook] DB update failed:', error)
         return NextResponse.json({ error: 'DB update failed' }, { status: 500 })
       }
 
-      logger.log(`[billing/webhook] ${event.type} → plan=${newPlan} customer=${customerId}`)
+      logger.log(`[billing/stripe-webhook] ${event.type} → plan=${newPlan} customer=${customerId}`)
     }
   } catch (err) {
     Sentry.captureException(err, { extra: { event: event.type } })
-    logger.error('[billing/webhook] Handler error:', err)
+    logger.error('[billing/stripe-webhook] Handler error:', err)
     return NextResponse.json({ error: 'Handler error' }, { status: 500 })
   }
 

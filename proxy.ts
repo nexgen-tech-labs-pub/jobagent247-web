@@ -34,6 +34,14 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  // Set locale cookie on first visit based on geo
+  const existingLocale = request.cookies.get('locale')?.value
+  let detectedLocale: 'uk' | 'in' = 'uk'
+  if (!existingLocale) {
+    const country = request.headers.get('x-vercel-ip-country') ?? undefined
+    detectedLocale = country === 'IN' ? 'in' : 'uk'
+  }
+
   let response = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -55,6 +63,15 @@ export async function proxy(request: NextRequest) {
 
   // Refresh session on every request
   const { data: { user } } = await supabase.auth.getUser()
+
+  // Apply locale cookie AFTER getUser so it goes on the final response
+  if (!existingLocale) {
+    response.cookies.set('locale', detectedLocale, {
+      maxAge: 60 * 60 * 24 * 365,
+      path: '/',
+      sameSite: 'lax',
+    })
+  }
 
   const path = request.nextUrl.pathname
   const isProtected = protectedRoutes.some(r => path.startsWith(r))

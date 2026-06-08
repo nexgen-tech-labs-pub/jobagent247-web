@@ -9,7 +9,7 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from('users')
-    .select('name, location, plan')
+    .select('name, location, plan, locale')
     .eq('id', user.id)
     .single()
 
@@ -19,6 +19,7 @@ export default async function SettingsPage() {
       email={user.email ?? ''}
       location={profile?.location ?? ''}
       plan={(profile?.plan as 'free' | 'pro' | 'accelerator') ?? 'free'}
+      locale={(profile?.locale as 'uk' | 'in') ?? 'uk'}
     />
   )
 }

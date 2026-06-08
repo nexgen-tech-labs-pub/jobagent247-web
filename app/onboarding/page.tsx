@@ -8,7 +8,7 @@ import { CVUpload } from '@/components/profile/CVUpload'
 import { getBrowserClient } from '@/lib/supabase-browser'
 import type { CV } from '@/lib/types/database'
 
-const STEPS = ['Basic Info', 'Job Preferences', 'Keywords', 'Priority', 'Upload CV']
+const STEPS = ['Basic Info', 'Your Market', 'Job Preferences', 'Keywords', 'Priority', 'Upload CV']
 const TOTAL = STEPS.length
 
 type Prefs = {
@@ -21,6 +21,7 @@ type Prefs = {
   visaRequired: boolean
   keywords: string
   priority: string
+  locale: 'uk' | 'in'
 }
 
 const DEFAULTS: Prefs = {
@@ -33,6 +34,7 @@ const DEFAULTS: Prefs = {
   visaRequired: false,
   keywords: '',
   priority: 'Role title',
+  locale: 'uk',
 }
 
 export default function OnboardingPage() {
@@ -51,9 +53,14 @@ export default function OnboardingPage() {
       const authUser = res.data.user
       if (!authUser) { router.replace('/login'); return }
       setUserId(authUser.id)
+      const localeCookie = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('locale='))
+        ?.split('=')[1]
       setPrefs(p => ({
         ...p,
         name: (authUser.user_metadata as { full_name?: string })?.full_name ?? '',
+        locale: (localeCookie === 'in' ? 'in' : 'uk') as 'uk' | 'in',
       }))
     })
   }, [router])
@@ -64,17 +71,24 @@ export default function OnboardingPage() {
   const saveStep = useCallback(async () => {
     const body: Record<string, unknown> = {}
     if (step === 0) Object.assign(body, { name: prefs.name, current_role: prefs.currentRole, location: prefs.location })
-    if (step === 1) Object.assign(body, { target_roles: prefs.targetRoles, job_type_pref: prefs.jobType, location_pref: prefs.locationPref, visa_required: prefs.visaRequired })
-    if (step === 2) Object.assign(body, { keywords: prefs.keywords.split(/\s+/).filter(Boolean) })
-    if (step === 3) Object.assign(body, { priority: prefs.priority })
+    if (step === 1) Object.assign(body, { locale: prefs.locale })
+    if (step === 2) Object.assign(body, { target_roles: prefs.targetRoles, job_type_pref: prefs.jobType, location_pref: prefs.locationPref, visa_required: prefs.visaRequired })
+    if (step === 3) Object.assign(body, { keywords: prefs.keywords.split(/\s+/).filter(Boolean) })
+    if (step === 4) Object.assign(body, { priority: prefs.priority })
     if (Object.keys(body).length) {
-      await fetch('/api/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      const res = await fetch('/api/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      if (!res.ok) throw new Error('Profile save failed')
     }
   }, [step, prefs])
 
   const next = useCallback(async () => {
     setSaving(true)
-    await saveStep()
+    try {
+      await saveStep()
+    } catch {
+      setSaving(false)
+      return
+    }
     setSaving(false)
     if (step < TOTAL - 1) { setStep(s => s + 1); return }
     // Final step — complete onboarding
@@ -138,8 +152,34 @@ export default function OnboardingPage() {
           </>
         )}
 
-        {/* Step 2 — Job Preferences */}
+        {/* Step 2 — Your Market */}
         {step === 1 && (
+          <>
+            <Heading>Where are you based?</Heading>
+            <p className="text-sm" style={{ color: '#64748B' }}>This determines your pricing, job sources, and payment options.</p>
+            <Field label="Market">
+              <div className="space-y-3 mt-1">
+                {(['uk', 'in'] as const).map(loc => (
+                  <button
+                    key={loc}
+                    type="button"
+                    onClick={() => set('locale', loc)}
+                    className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-medium transition-all text-left"
+                    style={prefs.locale === loc
+                      ? { background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.4)', color: '#8B5CF6' }
+                      : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--color-text-secondary)' }}
+                  >
+                    <span>{loc === 'uk' ? '🇬🇧 United Kingdom' : '🇮🇳 India'}</span>
+                    {prefs.locale === loc && <Check className="w-4 h-4" />}
+                  </button>
+                ))}
+              </div>
+            </Field>
+          </>
+        )}
+
+        {/* Step 3 — Job Preferences */}
+        {step === 2 && (
           <>
             <Heading>What kind of roles are you after?</Heading>
             <Field label="Target roles">
@@ -175,8 +215,8 @@ export default function OnboardingPage() {
           </>
         )}
 
-        {/* Step 3 — Keywords */}
-        {step === 2 && (
+        {/* Step 4 — Keywords */}
+        {step === 3 && (
           <>
             <Heading>What skills and tools are you looking for?</Heading>
             <p className="text-sm" style={{ color: '#64748B' }}>Space-separated — these become your initial job search criteria.</p>
@@ -203,8 +243,8 @@ export default function OnboardingPage() {
           </>
         )}
 
-        {/* Step 4 — Priority */}
-        {step === 3 && (
+        {/* Step 5 — Priority */}
+        {step === 4 && (
           <>
             <Heading>What matters most to you?</Heading>
             <p className="text-sm" style={{ color: '#64748B' }}>This helps us rank and surface the best job matches for you.</p>
@@ -212,6 +252,7 @@ export default function OnboardingPage() {
               {['Salary', 'Location', 'Role title', 'Company', 'Benefits'].map(opt => (
                 <button
                   key={opt}
+                  type="button"
                   onClick={() => set('priority', opt)}
                   className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-medium transition-all text-left"
                   style={prefs.priority === opt
@@ -226,8 +267,8 @@ export default function OnboardingPage() {
           </>
         )}
 
-        {/* Step 5 — CV Upload */}
-        {step === 4 && (
+        {/* Step 6 — CV Upload */}
+        {step === 5 && (
           <>
             <Heading>Upload your CV</Heading>
             <p className="text-sm" style={{ color: '#64748B' }}>Our agents use your CV to tailor applications and score job matches. You can skip this and upload later.</p>

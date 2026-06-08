@@ -5,6 +5,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { GradientButton } from '@/components/ui/GradientButton'
 import { SecondaryButton } from '@/components/ui/SecondaryButton'
+import { usePaddleCheckout } from '@/components/ui/PaddleCheckout'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Check, Zap, Shield } from 'lucide-react'
 
@@ -13,14 +14,37 @@ interface SettingsClientProps {
   email: string
   location: string
   plan: 'free' | 'pro' | 'accelerator'
+  locale: 'uk' | 'in'
 }
 
-export function SettingsClient({ name, email, location, plan }: SettingsClientProps) {
+export function SettingsClient({ name, email, location, plan, locale }: SettingsClientProps) {
   const [saved, setSaved] = useState(false)
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
+  const { openCheckout } = usePaddleCheckout()
 
   const handleSave = () => {
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
+  }
+
+  const handleCheckout = async (planKey: string) => {
+    setCheckoutLoading(planKey)
+    try {
+      const res = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: planKey, interval: 'month' }),
+      })
+      const data = await res.json() as { provider?: string; url?: string; transactionId?: string; error?: string }
+      if (!res.ok || data.error) throw new Error(data.error ?? 'Checkout failed')
+      if (data.provider === 'stripe' && data.url) {
+        window.location.href = data.url
+      } else if (data.provider === 'paddle' && data.transactionId) {
+        openCheckout(data.transactionId)
+      }
+    } finally {
+      setCheckoutLoading(null)
+    }
   }
 
   const planLabel =
@@ -122,29 +146,35 @@ export function SettingsClient({ name, email, location, plan }: SettingsClientPr
                   <div className="rounded-xl p-5 mb-4" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.12), rgba(6,182,212,0.08))', border: '1px solid rgba(139,92,246,0.3)' }}>
                     <div className="flex items-center gap-2 mb-2">
                       <Zap className="w-4 h-4" style={{ color: '#8B5CF6' }} />
-                      <span className="font-heading font-semibold text-white">Upgrade to Pro — £9.99/month</span>
+                      <span className="font-heading font-semibold text-white">
+                        Upgrade to Pro — {locale === 'in' ? '₹500' : '£9.99'}/month
+                      </span>
                     </div>
                     <p className="text-sm mb-4" style={{ color: '#CBD5E1' }}>Unlimited CV improvements, job matching, cover letters, and interview prep.</p>
-                    <form action="/api/billing/checkout" method="POST">
-                      <input type="hidden" name="plan" value="pro" />
-                      <input type="hidden" name="interval" value="month" />
-                      <input type="hidden" name="currency" value="gbp" />
-                      <button type="submit" className="btn-gradient text-sm px-4 py-2">Upgrade to Pro</button>
-                    </form>
+                    <button
+                      className="btn-gradient text-sm px-4 py-2 disabled:opacity-60"
+                      disabled={checkoutLoading === 'pro'}
+                      onClick={() => handleCheckout('pro')}
+                    >
+                      {checkoutLoading === 'pro' ? 'Processing…' : 'Upgrade to Pro'}
+                    </button>
                   </div>
 
                   <div className="rounded-xl p-5 mb-4" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.10), rgba(139,92,246,0.08))', border: '1px solid rgba(245,158,11,0.3)' }}>
                     <div className="flex items-center gap-2 mb-2">
                       <Zap className="w-4 h-4" style={{ color: '#F59E0B' }} />
-                      <span className="font-heading font-semibold text-white">Career Accelerator — £29.99/month</span>
+                      <span className="font-heading font-semibold text-white">
+                        Career Accelerator — {locale === 'in' ? '₹1,000' : '£29.99'}/month
+                      </span>
                     </div>
                     <p className="text-sm mb-4" style={{ color: '#CBD5E1' }}>Everything in Pro plus mock interviews, DOCX export, and priority support.</p>
-                    <form action="/api/billing/checkout" method="POST">
-                      <input type="hidden" name="plan" value="accelerator" />
-                      <input type="hidden" name="interval" value="month" />
-                      <input type="hidden" name="currency" value="gbp" />
-                      <button type="submit" className="btn-secondary text-sm px-4 py-2">Upgrade to Accelerator</button>
-                    </form>
+                    <button
+                      className="btn-secondary text-sm px-4 py-2 disabled:opacity-60"
+                      disabled={checkoutLoading === 'accelerator'}
+                      onClick={() => handleCheckout('accelerator')}
+                    >
+                      {checkoutLoading === 'accelerator' ? 'Processing…' : 'Upgrade to Accelerator'}
+                    </button>
                   </div>
                 </>
               )}
@@ -155,7 +185,11 @@ export function SettingsClient({ name, email, location, plan }: SettingsClientPr
                 </form>
               )}
 
-              <p className="text-xs mt-4" style={{ color: '#64748B' }}>Billing managed securely via Stripe. Cancel anytime. No hidden fees.</p>
+              <p className="text-xs mt-4" style={{ color: '#64748B' }}>
+                {locale === 'in'
+                  ? 'Billing managed securely via Paddle. Cancel anytime. No hidden fees.'
+                  : 'Billing managed securely via Stripe. Cancel anytime. No hidden fees.'}
+              </p>
             </GlassCard>
           </TabsContent>
 
