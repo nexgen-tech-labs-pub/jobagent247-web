@@ -1,16 +1,34 @@
 import { Sidebar } from './Sidebar'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { UserMenu } from '@/components/ui/UserMenu'
 import { Bell } from 'lucide-react'
+import { createServerClient } from '@/lib/supabase'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
   title: string
 }
 
-export function DashboardLayout({ children, title }: DashboardLayoutProps) {
+export async function DashboardLayout({ children, title }: DashboardLayoutProps) {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  let displayName = ''
+  let initials = 'U'
+  if (user) {
+    const { data } = await supabase.from('users').select('name').eq('id', user.id).single()
+    displayName = data?.name ?? user.email ?? ''
+    initials = displayName
+      .split(' ')
+      .slice(0, 2)
+      .map(w => w[0])
+      .join('')
+      .toUpperCase() || 'U'
+  }
+
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
+      <Sidebar initials={initials} name={displayName} />
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top header */}
         <header
@@ -26,10 +44,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
                 style={{ background: '#8B5CF6' }} />
             </button>
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-              style={{ background: 'linear-gradient(135deg, #8B5CF6, #06B6D4)', color: 'white' }}>
-              HK
-            </div>
+            <UserMenu initials={initials} name={displayName} />
           </div>
         </header>
 

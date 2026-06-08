@@ -14,7 +14,7 @@ export default function DataCompliancePage() {
     <LegalLayout title="Data Protection and Compliance Notice" lastUpdated={LAST_UPDATED}>
 
       <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-        This notice explains how JobAgent247, operated by Nexgen Tech Labs (United Kingdom), approaches data protection obligations across the jurisdictions in which our users may be located. Compliance obligations vary based on user location, business thresholds, data flows, vendor relationships, and legal interpretation. <strong>This notice does not constitute legal advice and should be reviewed by qualified legal counsel before production launch or commercial operation.</strong>
+        This notice explains how JobAgent247, operated by Nexgen Tech Labs (United Kingdom), approaches data protection obligations across the jurisdictions in which our users may be located. Compliance obligations vary based on user location, business thresholds, data flows, vendor relationships, and legal interpretation.
       </p>
 
       <Section title="United Kingdom">
@@ -60,9 +60,6 @@ export default function DataCompliancePage() {
         <SubSection title="Employment Law Disclaimer">
           <p>JobAgent247 is a software tool and is not an employer, recruiter, or hiring decision-maker. No US employment law obligations (such as EEO, ADA, or FLSA obligations) apply to Nexgen Tech Labs in respect of the users' job-search activities.</p>
         </SubSection>
-        <SubSection title="Legal Review Recommended">
-          <p>US privacy law is rapidly evolving. We recommend periodic legal review to assess compliance obligations as state laws develop.</p>
-        </SubSection>
       </Section>
 
       <Section title="India">
@@ -75,9 +72,6 @@ export default function DataCompliancePage() {
         </SubSection>
         <SubSection title="Grievance Officer">
           <p>For data-related complaints or requests from Indian users, please contact us at <a href="mailto:media@jobsagent247.com" className="underline" style={{ color: '#8B5CF6' }}>media@jobsagent247.com</a>. We will endeavour to respond within a reasonable timeframe in accordance with applicable requirements.</p>
-        </SubSection>
-        <SubSection title="Legal Review Recommended">
-          <p>The DPDPA and its implementing rules continue to develop. We recommend legal review to assess ongoing compliance obligations.</p>
         </SubSection>
       </Section>
 
@@ -103,7 +97,7 @@ export default function DataCompliancePage() {
           <p>Registered and operated in the United Kingdom</p>
           <p>Email: <a href="mailto:media@jobsagent247.com" className="underline" style={{ color: '#8B5CF6' }}>media@jobsagent247.com</a></p>
         </div>
-        <p>This notice reflects our current understanding of applicable obligations. It does not constitute legal advice and should be reviewed by a qualified legal professional before commercial launch or material changes to data processing activities.</p>
+        <p>This notice reflects our current understanding of applicable obligations.</p>
       </Section>
 
     </LegalLayout>

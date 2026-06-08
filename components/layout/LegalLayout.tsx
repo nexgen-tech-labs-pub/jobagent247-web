@@ -23,9 +23,6 @@ export function LegalLayout({ title, lastUpdated, children }: LegalLayoutProps) 
               {title}
             </h1>
             <p className="text-sm" style={{ color: '#64748B' }}>Last updated: {lastUpdated}</p>
-            <div className="mt-4 p-4 rounded-xl text-sm" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', color: '#D97706' }}>
-              <strong>Note:</strong> This document is provided for informational purposes only and does not constitute legal advice. Nexgen Tech Labs recommends that these policies be reviewed by a qualified legal professional before production launch.
-            </div>
           </div>
 
           {/* Content */}

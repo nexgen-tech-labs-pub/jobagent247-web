@@ -49,8 +49,8 @@ export function Navbar() {
 
           <div className="hidden md:flex items-center gap-3">
             <ThemeToggle />
-            <SecondaryButton href="/dashboard" size="sm">Sign in</SecondaryButton>
-            <GradientButton href="/dashboard" size="sm">Start free</GradientButton>
+            <SecondaryButton href="/login" size="sm">Sign in</SecondaryButton>
+            <GradientButton href="/signup" size="sm">Start free</GradientButton>
           </div>
 
           <div className="md:hidden flex items-center gap-2">
@@ -78,8 +78,8 @@ export function Navbar() {
             </Link>
           ))}
           <div className="flex flex-col gap-2 pt-2">
-            <SecondaryButton href="/dashboard" className="w-full justify-center">Sign in</SecondaryButton>
-            <GradientButton href="/dashboard" className="w-full justify-center">Start free</GradientButton>
+            <SecondaryButton href="/login" className="w-full justify-center">Sign in</SecondaryButton>
+            <GradientButton href="/signup" className="w-full justify-center">Start free</GradientButton>
           </div>
         </div>
       )}

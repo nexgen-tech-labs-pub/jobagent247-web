@@ -8,9 +8,12 @@ const protectedRoutes = [
   '/profile',
   '/cv-agent',
   '/job-matches',
+  '/job-fit',
+  '/career-intelligence',
   '/applications',
   '/interview-prep',
   '/settings',
+  '/onboarding',
 ]
 
 let _ipRatelimit: Ratelimit | null = null

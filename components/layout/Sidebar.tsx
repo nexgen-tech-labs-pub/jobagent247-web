@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
   User,
@@ -11,10 +11,11 @@ import {
   MessageSquare,
   Settings,
   Zap,
-  Bell,
   Target,
   BrainCircuit,
+  LogOut,
 } from 'lucide-react'
+import { createBrowserSupabaseClient } from '@/lib/supabase'
 
 const navItems = [
   { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
@@ -28,8 +29,21 @@ const navItems = [
   { label: 'Settings', href: '/settings', icon: Settings },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  initials?: string
+  name?: string
+}
+
+export function Sidebar({ initials = 'U', name }: SidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  async function handleSignOut() {
+    const supabase = createBrowserSupabaseClient()
+    await supabase.auth.signOut()
+    router.push('/')
+    router.refresh()
+  }
 
   return (
     <aside className="hidden lg:flex flex-col w-60 shrink-0 h-screen sticky top-0 sidebar-surface">
@@ -76,13 +90,19 @@ export function Sidebar() {
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
             style={{ background: 'linear-gradient(135deg, #8B5CF6, #06B6D4)', color: 'white' }}>
-            HK
+            {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-[color:var(--foreground)] truncate">Hitendra K.</p>
-            <p className="text-xs truncate" style={{ color: '#64748B' }}>Free plan</p>
+            <p className="text-sm font-medium text-[color:var(--foreground)] truncate">{name || 'My Account'}</p>
           </div>
-          <Bell className="w-4 h-4 shrink-0" style={{ color: '#64748B' }} />
+          <button
+            onClick={handleSignOut}
+            className="p-1.5 rounded-lg transition-colors hover:bg-white/10"
+            style={{ color: '#64748B' }}
+            title="Sign out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </aside>

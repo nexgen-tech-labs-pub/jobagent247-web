@@ -1,4 +1,4 @@
-import { createServerClient as createSSRServerClient } from '@supabase/ssr'
+import { createServerClient as createSSRServerClient, createBrowserClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
@@ -20,6 +20,11 @@ export async function createServerClient() {
       },
     },
   })
+}
+
+// Browser client — for use in Client Components (sign-in, sign-out, real-time)
+export function createBrowserSupabaseClient() {
+  return createBrowserClient(supabaseUrl, supabaseAnonKey)
 }
 
 // Service role client — bypasses RLS entirely
