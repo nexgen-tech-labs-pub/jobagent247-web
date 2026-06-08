@@ -107,16 +107,18 @@
     color: #0F172A;
   }
 
+  /* Headings → solid deep purple (no transparent clip — avoids child inheritance bug) */
   .light h1,
   .light h2,
   .light h3,
   .light h4,
   .light h5,
   .light h6 {
-    background: linear-gradient(90deg, #0E7490 0%, #3730A3 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #3730A3;
+    -webkit-text-fill-color: #3730A3;
+    background: none;
+    -webkit-background-clip: initial;
+    background-clip: initial;
   }
 
   body {
@@ -337,32 +339,43 @@
 
   /* Make text-white elements use foreground color in light mode (non-headings) */
   .light .text-white {
-    color: var(--foreground) !important;
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
   }
 
-  /* Ensure heading gradient takes over text-white in light mode */
+  /* Ensure heading text-white in light mode uses deep purple */
   .light h1.text-white,
   .light h2.text-white,
   .light h3.text-white,
   .light h4.text-white,
   .light h5.text-white,
   .light h6.text-white {
-    background: linear-gradient(90deg, #0E7490 0%, #3730A3 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #3730A3 !important;
+    -webkit-text-fill-color: #3730A3 !important;
+    background: none;
+    -webkit-background-clip: initial;
+    background-clip: initial;
   }
 
-  /* Hardcoded inline muted color overrides for light mode */
+  /* Bold/semibold text-white in light mode → deep purple */
+  .light .font-bold.text-white,
+  .light .font-semibold.text-white,
+  .light [class*="font-bold"].text-white,
+  .light [class*="font-semibold"].text-white {
+    color: #3730A3 !important;
+    -webkit-text-fill-color: #3730A3 !important;
+  }
+
+  /* Hardcoded inline muted color overrides for light mode (3x darker) */
   .light [style*="color: #94A3B8"],
   .light [style*="color: #CBD5E1"],
   .light [style*="color:#94A3B8"],
   .light [style*="color:#CBD5E1"] {
-    color: #334155 !important;
+    color: #1E293B !important;
   }
 
   .light [style*="color: #64748B"],
   .light [style*="color:#64748B"] {
-    color: #1E293B !important;
+    color: #0F172A !important;
   }
 }
