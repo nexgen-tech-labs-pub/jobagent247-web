@@ -1,5 +1,3 @@
-import { cookies } from 'next/headers'
-
 export type Locale = 'uk' | 'in'
 export const SUPPORTED_LOCALES: Locale[] = ['uk', 'in']
 const LOCALE_COOKIE = 'locale'
@@ -11,6 +9,7 @@ export function parseLocale(value: string | undefined | null): Locale {
 }
 
 export async function getServerLocale(): Promise<Locale> {
+  const { cookies } = await import('next/headers')
   const jar = await cookies()
   return parseLocale(jar.get(LOCALE_COOKIE)?.value)
 }
