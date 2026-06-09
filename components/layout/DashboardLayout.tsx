@@ -2,35 +2,17 @@ import { Sidebar } from './Sidebar'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { UserMenu } from '@/components/ui/UserMenu'
 import { Bell } from 'lucide-react'
-import { createServerClient } from '@/lib/supabase'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
   title: string
 }
 
-export async function DashboardLayout({ children, title }: DashboardLayoutProps) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  let displayName = ''
-  let initials = 'U'
-  if (user) {
-    const { data } = await supabase.from('users').select('name').eq('id', user.id).single()
-    displayName = data?.name ?? user.email ?? ''
-    initials = displayName
-      .split(' ')
-      .slice(0, 2)
-      .map(w => w[0])
-      .join('')
-      .toUpperCase() || 'U'
-  }
-
+export function DashboardLayout({ children, title }: DashboardLayoutProps) {
   return (
     <div className="flex min-h-screen">
-      <Sidebar initials={initials} name={displayName} />
+      <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top header */}
         <header
           className="h-16 flex items-center justify-between px-6 shrink-0 sticky top-0 z-10 dashboard-header-surface"
           style={{ backdropFilter: 'blur(20px)' }}
@@ -44,11 +26,9 @@ export async function DashboardLayout({ children, title }: DashboardLayoutProps)
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
                 style={{ background: '#8B5CF6' }} />
             </button>
-            <UserMenu initials={initials} name={displayName} />
+            <UserMenu />
           </div>
         </header>
-
-        {/* Main content */}
         <main className="flex-1 p-6 overflow-auto">
           {children}
         </main>

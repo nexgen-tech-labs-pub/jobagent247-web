@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import {
   LayoutDashboard,
   User,
@@ -15,7 +16,7 @@ import {
   BrainCircuit,
   LogOut,
 } from 'lucide-react'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { getBrowserClient } from '@/lib/supabase-browser'
 
 const navItems = [
   { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
@@ -29,17 +30,29 @@ const navItems = [
   { label: 'Settings', href: '/settings', icon: Settings },
 ]
 
-interface SidebarProps {
-  initials?: string
-  name?: string
-}
-
-export function Sidebar({ initials = 'U', name }: SidebarProps) {
+export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
+  const [initials, setInitials] = useState('U')
+  const [name, setName] = useState('')
+
+  useEffect(() => {
+    const supabase = getBrowserClient()
+    void (async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase.from('users').select('name').eq('id', user.id).single()
+      if (data?.name) {
+        setName(data.name)
+        setInitials(
+          (data.name as string).split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase() || 'U'
+        )
+      }
+    })()
+  }, [])
 
   async function handleSignOut() {
-    const supabase = createBrowserSupabaseClient()
+    const supabase = getBrowserClient()
     await supabase.auth.signOut()
     router.push('/')
     router.refresh()

@@ -4,18 +4,29 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { LogOut, User, Settings } from 'lucide-react'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { getBrowserClient } from '@/lib/supabase-browser'
 
-interface UserMenuProps {
-  initials?: string
-  name?: string
-  plan?: string
-}
-
-export function UserMenu({ initials = 'U', name, plan }: UserMenuProps) {
+export function UserMenu() {
   const [open, setOpen] = useState(false)
+  const [initials, setInitials] = useState('U')
+  const [name, setName] = useState('')
   const ref = useRef<HTMLDivElement>(null)
   const router = useRouter()
+
+  useEffect(() => {
+    const supabase = getBrowserClient()
+    void (async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase.from('users').select('name').eq('id', user.id).single()
+      if (data?.name) {
+        setName(data.name)
+        setInitials(
+          (data.name as string).split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase() || 'U'
+        )
+      }
+    })()
+  }, [])
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -26,7 +37,7 @@ export function UserMenu({ initials = 'U', name, plan }: UserMenuProps) {
   }, [])
 
   async function handleSignOut() {
-    const supabase = createBrowserSupabaseClient()
+    const supabase = getBrowserClient()
     await supabase.auth.signOut()
     router.push('/')
     router.refresh()
@@ -56,7 +67,6 @@ export function UserMenu({ initials = 'U', name, plan }: UserMenuProps) {
           {name && (
             <div className="px-4 py-2 border-b" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
               <p className="text-sm font-medium text-[color:var(--foreground)] truncate">{name}</p>
-              {plan && <p className="text-xs truncate" style={{ color: '#64748B' }}>{plan}</p>}
             </div>
           )}
           <Link
