@@ -20,6 +20,7 @@ export interface User {
   stripe_customer_id: string | null
   paddle_customer_id: string | null
   locale: 'uk' | 'in'
+  usage_counts: Record<string, number>
   created_at: string
 }
 

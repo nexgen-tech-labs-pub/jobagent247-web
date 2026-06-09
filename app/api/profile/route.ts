@@ -31,6 +31,7 @@ export async function GET() {
         stripe_customer_id: null,
         paddle_customer_id: null,
         locale: 'uk',
+        usage_counts: {},
       })
       return NextResponse.json(created)
     }

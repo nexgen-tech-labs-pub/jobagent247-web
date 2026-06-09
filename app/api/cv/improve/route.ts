@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { getUserPlan } from '@/lib/db/users'
-import { checkRateLimit } from '@/lib/rate-limit'
+import { checkQuota } from '@/lib/rate-limit'
 import { streamCVImprovement } from '@/lib/claude'
 import { classifyRole, getRoleProfile } from '@/lib/db/role-profiles'
 
@@ -13,17 +13,10 @@ export async function POST(request: NextRequest) {
   }
 
   const plan = await getUserPlan(supabase, user.id)
-  if (plan === 'free') {
-    return new Response(
-      JSON.stringify({ error: 'Upgrade to Pro to unlock full CV rewrite' }),
-      { status: 403, headers: { 'Content-Type': 'application/json' } }
-    )
-  }
-
-  const { allowed, remaining } = await checkRateLimit(user.id, plan)
+  const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'cv_improve')
   if (!allowed) {
     return new Response(
-      JSON.stringify({ error: 'Daily application limit reached.', remaining: 0 }),
+      JSON.stringify({ error: 'Free plan allows 1 CV rewrite. Upgrade for unlimited.', remaining: 0 }),
       { status: 429, headers: { 'Content-Type': 'application/json' } }
     )
   }

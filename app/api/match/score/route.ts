@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { getUserPlan } from '@/lib/db/users'
-import { checkRateLimit } from '@/lib/rate-limit'
+import { checkQuota } from '@/lib/rate-limit'
 import { getJobById, upsertUserJobScore } from '@/lib/db/jobs'
 import { scoreJobMatch } from '@/lib/claude'
 import { classifyRole, getRoleProfile } from '@/lib/db/role-profiles'
@@ -18,9 +18,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const plan = await getUserPlan(supabase, user.id)
-    const { allowed, remaining } = await checkRateLimit(user.id, plan)
+    const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'job_match')
     if (!allowed) {
-      return NextResponse.json({ error: 'Daily limit reached. Upgrade for more.', remaining: 0 }, { status: 429 })
+      return NextResponse.json({ error: 'Free plan allows 2 job matches. Upgrade for more.', remaining: 0 }, { status: 429 })
     }
 
     const { data: cv } = await supabase
