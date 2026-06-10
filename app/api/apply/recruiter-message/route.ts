@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { getUserPlan } from '@/lib/db/users'
+import { getUserBillingContext } from '@/lib/db/users'
 import { checkQuota } from '@/lib/rate-limit'
 import { insertDocument } from '@/lib/db/documents'
 import { generateRecruiterMessage } from '@/lib/claude'
@@ -23,8 +23,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const plan = await getUserPlan(supabase, user.id)
-    const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'recruiter_message')
+    const { plan, locale } = await getUserBillingContext(supabase, user.id)
+    const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'recruiter_message', locale)
     if (!allowed) {
       return NextResponse.json({ error: 'Free plan allows 1 recruiter message. Upgrade for more.', remaining: 0 }, { status: 429 })
     }

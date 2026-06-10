@@ -21,6 +21,7 @@ export interface User {
   paddle_customer_id: string | null
   locale: 'uk' | 'in'
   usage_counts: Record<string, number>
+  credits_balance: number
   created_at: string
 }
 
@@ -345,10 +346,21 @@ type TableDef<Row, Insert, Update> = {
 }
 
 // Supabase database type map (for createClient<Database> generic)
+export interface CreditTransaction {
+  id: string
+  user_id: string
+  delta: number
+  feature: string | null
+  description: string
+  paddle_txn_id: string | null
+  created_at: string
+}
+
 export interface Database {
   public: {
     Tables: {
       users: TableDef<User, Omit<User, 'created_at'>, Partial<Omit<User, 'id'>>>
+      credit_transactions: TableDef<CreditTransaction, Omit<CreditTransaction, 'id' | 'created_at'>, never>
       cvs: TableDef<CV, Omit<CV, 'id' | 'created_at'>, Partial<Omit<CV, 'id'>>>
       jobs: TableDef<Job, Omit<Job, 'id' | 'scraped_at'>, Partial<Omit<Job, 'id'>>>
       user_jobs: TableDef<UserJob, Omit<UserJob, 'id' | 'created_at'>, Partial<Omit<UserJob, 'id'>>>

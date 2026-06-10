@@ -23,6 +23,7 @@ function CVAgentInner() {
   const [improvedCV, setImprovedCV] = useState('')
   const [upgradeRequired, setUpgradeRequired] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const [tone, setTone] = useState<'formal' | 'direct' | 'enthusiastic'>('direct')
   const [generatingCL, setGeneratingCL] = useState(false)
   const [coverLetter, setCoverLetter] = useState('')
@@ -171,6 +172,28 @@ function CVAgentInner() {
       setImprovedCV((prev) => prev + decoder.decode(value))
     }
     setImproving(false)
+  }
+
+  const handleExport = async () => {
+    if (!improvedCV || exporting) return
+    setExporting(true)
+    try {
+      const res = await fetch('/api/export/text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: improvedCV, name: 'Rewritten CV' }),
+      })
+      if (!res.ok) { setExporting(false); return }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'cv.docx'
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setExporting(false)
+    }
   }
 
   const handleCoverLetter = async () => {
@@ -463,8 +486,15 @@ function CVAgentInner() {
           {/* Improve / export actions */}
           {result && (
             <div className="flex gap-3">
-              <SecondaryButton size="sm" className="flex-1 justify-center" disabled>
-                <Download className="w-3.5 h-3.5" /> Export CV
+              <SecondaryButton
+                size="sm"
+                className="flex-1 justify-center"
+                onClick={handleExport}
+                disabled={!improvedCV || exporting}
+              >
+                {exporting
+                  ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Exporting…</>
+                  : <><Download className="w-3.5 h-3.5" /> Export DOCX</>}
               </SecondaryButton>
               <GradientButton
                 size="sm"

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { getUserPlan } from '@/lib/db/users'
+import { getUserBillingContext } from '@/lib/db/users'
 import { checkQuota } from '@/lib/rate-limit'
 import { insertDocument } from '@/lib/db/documents'
 import { generateCoverLetter } from '@/lib/claude'
@@ -23,8 +23,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'cvId, jobDescription and jobTitle are required' }, { status: 400 })
   }
 
-  const plan = await getUserPlan(supabase, user.id)
-  const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'cover_letter')
+  const { plan, locale } = await getUserBillingContext(supabase, user.id)
+  const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'cover_letter', locale)
   if (!allowed) {
     return NextResponse.json({ error: 'Free plan allows 1 cover letter. Upgrade for more.', remaining: 0 }, { status: 429 })
   }

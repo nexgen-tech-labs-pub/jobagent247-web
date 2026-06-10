@@ -32,6 +32,7 @@ export async function GET() {
         paddle_customer_id: null,
         locale: 'uk',
         usage_counts: {},
+        credits_balance: 0,
       })
       return NextResponse.json(created)
     }

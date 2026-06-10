@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { getUserPlan } from '@/lib/db/users'
+import { getUserBillingContext } from '@/lib/db/users'
 import { checkQuota } from '@/lib/rate-limit'
 import { upsertUserJobScore } from '@/lib/db/jobs'
 import { scoreJobMatch } from '@/lib/claude'
@@ -21,8 +21,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const plan = await getUserPlan(supabase, user.id)
-    const { allowed } = await checkQuota(supabase, user.id, plan, 'match_bulk')
+    const { plan, locale } = await getUserBillingContext(supabase, user.id)
+    const { allowed } = await checkQuota(supabase, user.id, plan, 'match_bulk', locale)
     if (!allowed) {
       return NextResponse.json({ error: 'Free plan allows 2 bulk match requests. Upgrade for more.', remaining: 0 }, { status: 429 })
     }

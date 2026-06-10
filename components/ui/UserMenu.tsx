@@ -18,7 +18,7 @@ export function UserMenu() {
     void (async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      const { data } = await supabase.from('users').select('name').eq('id', user.id).single()
+      const { data } = await supabase.from('users').select('name').eq('id', user.id).maybeSingle()
       if (data?.name) {
         setName(data.name)
         setInitials(

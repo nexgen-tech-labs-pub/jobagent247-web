@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { getUserPlan } from '@/lib/db/users'
+import { getUserBillingContext } from '@/lib/db/users'
 import { checkQuota } from '@/lib/rate-limit'
 import { generateInterviewKit } from '@/lib/claude'
 import { saveInterviewKit } from '@/lib/db/interview'
@@ -23,8 +23,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const plan = await getUserPlan(supabase, user.id)
-    const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'interview_kit')
+    const { plan, locale } = await getUserBillingContext(supabase, user.id)
+    const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'interview_kit', locale)
     if (!allowed) {
       return NextResponse.json({ error: 'Free plan allows 1 interview kit. Upgrade for more.', remaining: 0 }, { status: 429 })
     }

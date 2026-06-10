@@ -21,6 +21,18 @@ const PADDLE_PRICE_IDS: Record<string, Record<string, string>> = {
   },
 }
 
+// India PAYG credit packs — one-time purchase price IDs
+export const PADDLE_CREDIT_PACKS: { priceId: string; credits: number; label: string }[] = [
+  { priceId: process.env.PADDLE_CREDITS_10_INR ?? '', credits: 10,  label: '10 credits — ₹99'  },
+  { priceId: process.env.PADDLE_CREDITS_25_INR ?? '', credits: 25,  label: '25 credits — ₹199' },
+  { priceId: process.env.PADDLE_CREDITS_60_INR ?? '', credits: 60,  label: '60 credits — ₹399' },
+]
+
+export function creditPackFromPriceId(priceId: string): number | null {
+  const pack = PADDLE_CREDIT_PACKS.find(p => p.priceId === priceId && p.priceId !== '')
+  return pack ? pack.credits : null
+}
+
 export function getPaddlePriceId(plan: string, interval: string): string {
   const id = PADDLE_PRICE_IDS[plan]?.[interval]
   if (!id) throw new Error(`No Paddle price ID configured for ${plan}/${interval}`)

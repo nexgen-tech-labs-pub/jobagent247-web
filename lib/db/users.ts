@@ -53,3 +53,25 @@ export async function getUserPlan(
     .single()
   return (data?.plan ?? 'free') as 'free' | 'pro' | 'accelerator'
 }
+
+export interface UserBillingContext {
+  plan: 'free' | 'pro' | 'accelerator'
+  locale: 'uk' | 'in'
+  creditsBalance: number
+}
+
+export async function getUserBillingContext(
+  db: Client,
+  userId: string
+): Promise<UserBillingContext> {
+  const { data } = await db
+    .from('users')
+    .select('plan, locale, credits_balance')
+    .eq('id', userId)
+    .single()
+  return {
+    plan: (data?.plan ?? 'free') as 'free' | 'pro' | 'accelerator',
+    locale: (data?.locale ?? 'uk') as 'uk' | 'in',
+    creditsBalance: (data?.credits_balance ?? 0) as number,
+  }
+}

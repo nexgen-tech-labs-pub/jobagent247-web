@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { getUserPlan } from '@/lib/db/users'
+import { getUserBillingContext } from '@/lib/db/users'
 import { checkQuota } from '@/lib/rate-limit'
 import { streamCVImprovement } from '@/lib/claude'
 import { classifyRole, getRoleProfile } from '@/lib/db/role-profiles'
@@ -12,8 +12,8 @@ export async function POST(request: NextRequest) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })
   }
 
-  const plan = await getUserPlan(supabase, user.id)
-  const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'cv_improve')
+  const { plan, locale } = await getUserBillingContext(supabase, user.id)
+  const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'cv_improve', locale)
   if (!allowed) {
     return new Response(
       JSON.stringify({ error: 'Free plan allows 1 CV rewrite. Upgrade for unlimited.', remaining: 0 }),

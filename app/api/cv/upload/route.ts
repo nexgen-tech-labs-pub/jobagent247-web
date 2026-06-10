@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { createAdminClient } from '@/lib/supabase'
 import { insertCV, getCVsByUser } from '@/lib/db/cvs'
-import { getUserPlan } from '@/lib/db/users'
+import { getUserBillingContext } from '@/lib/db/users'
 import { checkQuota } from '@/lib/rate-limit'
 
 const MAX_SIZE = 10 * 1024 * 1024 // 10MB
@@ -12,8 +12,8 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const plan = await getUserPlan(supabase, user.id)
-  const { allowed } = await checkQuota(supabase, user.id, plan, 'cv_upload')
+  const { plan, locale } = await getUserBillingContext(supabase, user.id)
+  const { allowed } = await checkQuota(supabase, user.id, plan, 'cv_upload', locale)
   if (!allowed) {
     return NextResponse.json(
       { error: 'Free plan allows 1 CV upload. Upgrade to upload more.' },

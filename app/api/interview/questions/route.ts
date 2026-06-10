@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { getUserPlan } from '@/lib/db/users'
+import { getUserBillingContext } from '@/lib/db/users'
 import { checkQuota } from '@/lib/rate-limit'
 import { generateInterviewQuestions } from '@/lib/claude'
 import { classifyRole, getRoleProfile } from '@/lib/db/role-profiles'
@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
       : 10
     const count = Math.min(rawCount, 20)
 
-    const plan = await getUserPlan(supabase, user.id)
-    const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'interview_prep')
+    const { plan, locale } = await getUserBillingContext(supabase, user.id)
+    const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'interview_prep', locale)
     if (!allowed) {
       return NextResponse.json({ error: 'Free plan allows 1 interview prep session. Upgrade for more.', remaining: 0 }, { status: 429 })
     }

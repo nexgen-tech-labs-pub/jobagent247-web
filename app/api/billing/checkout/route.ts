@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
 import { createServerClient } from '@/lib/supabase'
 import { getStripe, getPriceId } from '@/lib/stripe'
-import { getPaddle, getPaddlePriceId } from '@/lib/paddle'
+import { getPaddle, getPaddlePriceId, PADDLE_CREDIT_PACKS } from '@/lib/paddle'
 
 const logger = console
 
@@ -11,9 +11,10 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await req.json() as { plan?: string; interval?: string }
+  const body = await req.json() as { plan?: string; interval?: string; creditPackPriceId?: string }
   const plan = body.plan ?? 'pro'
   const interval = body.interval ?? 'month'
+  const creditPackPriceId = body.creditPackPriceId
 
   const { data: profile } = await supabase
     .from('users')
@@ -23,10 +24,17 @@ export async function POST(req: NextRequest) {
 
   if (profile?.locale === 'in') {
     let priceId: string
-    try {
-      priceId = getPaddlePriceId(plan, interval)
-    } catch {
-      return NextResponse.json({ error: 'Invalid plan or price not configured' }, { status: 400 })
+
+    if (creditPackPriceId) {
+      const pack = PADDLE_CREDIT_PACKS.find(p => p.priceId === creditPackPriceId && p.priceId !== '')
+      if (!pack) return NextResponse.json({ error: 'Invalid credit pack' }, { status: 400 })
+      priceId = pack.priceId
+    } else {
+      try {
+        priceId = getPaddlePriceId(plan, interval)
+      } catch {
+        return NextResponse.json({ error: 'Invalid plan or price not configured' }, { status: 400 })
+      }
     }
 
     try {

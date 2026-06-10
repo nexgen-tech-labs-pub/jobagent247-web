@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { getUser } from '@/lib/db/users'
-import { triggerApifyRun } from '@/lib/apify'
+import { runJobSearch } from '@/lib/job-sources'
 
 const logger = console  // swap for Sentry logger in Phase 5
 
@@ -20,38 +20,41 @@ export async function POST() {
     )
   }
 
-  const location = profile.location_pref ?? 'United Kingdom'
+  const locale = profile.locale ?? 'uk'
+  const location = profile.location_pref ?? (locale === 'in' ? 'India' : 'United Kingdom')
   const remoteOnly = profile.job_type_pref?.toLowerCase() === 'remote'
 
-  const linkedinId = process.env.APIFY_ACTOR_LINKEDIN ?? 'bebity/linkedin-jobs-scraper'
-  const indeedId   = process.env.APIFY_ACTOR_INDEED   ?? 'misceres/indeed-scraper'
-
-  const linkedinInput = {
-    keywords: targetRole,
-    location,
-    remote: remoteOnly,
-    maxResults: 25,
-  }
-  const indeedInput = {
-    position: targetRole,
-    country: 'UK',
-    location,
-    maxItems: 25,
-  }
-
   try {
-    const [linkedinRunId, indeedRunId] = await Promise.all([
-      triggerApifyRun(linkedinId, linkedinInput),
-      triggerApifyRun(indeedId, indeedInput),
-    ])
-    return NextResponse.json({
-      runs: [
-        { runId: linkedinRunId, source: 'LinkedIn' },
-        { runId: indeedRunId, source: 'Indeed' },
-      ],
+    const runs = await runJobSearch({
+      targetRole,
+      location,
+      remoteOnly,
+      locale,
+      userId: user.id,
     })
+    return NextResponse.json({ runs })
   } catch (err) {
-    logger.error('[jobs/fetch] Apify trigger error:', err)
-    return NextResponse.json({ error: 'Failed to start job search' }, { status: 500 })
+    const apifyType = (err as Error & { apifyType?: string }).apifyType ?? ''
+    logger.error('[jobs/fetch] error:', apifyType, err instanceof Error ? err.message : err)
+
+    if (apifyType === 'actor-is-not-rented') {
+      return NextResponse.json(
+        { error: 'Job scraping actors require a paid Apify subscription. Please rent the actors or contact support.' },
+        { status: 503 }
+      )
+    }
+    if (err instanceof Error && err.message.includes('APIFY_API_TOKEN')) {
+      return NextResponse.json(
+        { error: 'Job scraping is not configured. APIFY_API_TOKEN is missing.' },
+        { status: 503 }
+      )
+    }
+    if (err instanceof Error && (err.message.includes('GCP_CLOUD_RUN_URL') || err.message.includes('CLOUD_TASKS_HANDLER_TOKEN'))) {
+      return NextResponse.json(
+        { error: 'Job scraping is not configured. Cloud Run credentials are missing.' },
+        { status: 503 }
+      )
+    }
+    return NextResponse.json({ error: 'Failed to start job search. Please try again.' }, { status: 500 })
   }
 }

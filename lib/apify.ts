@@ -30,8 +30,16 @@ export async function triggerApifyRun(
     }
   )
   if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`Apify trigger failed (${res.status}): ${text}`)
+    let errorType = 'apify-error'
+    let errorMessage = `Apify trigger failed (${res.status})`
+    try {
+      const body = await res.json() as { error?: { type?: string; message?: string } }
+      errorType = body.error?.type ?? errorType
+      errorMessage = body.error?.message ?? errorMessage
+    } catch { /* non-JSON body */ }
+    const err = new Error(errorMessage)
+    ;(err as Error & { apifyType: string }).apifyType = errorType
+    throw err
   }
   const json = await res.json() as { data: ApifyRunResult }
   return json.data.id

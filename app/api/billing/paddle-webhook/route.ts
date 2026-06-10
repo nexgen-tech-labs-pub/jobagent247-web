@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
 import { type EventEntity, EventName } from '@paddle/paddle-node-sdk'
-import { getPaddle, paddlePlanFromPriceId } from '@/lib/paddle'
+import { getPaddle, paddlePlanFromPriceId, creditPackFromPriceId } from '@/lib/paddle'
 import { createAdminClient } from '@/lib/supabase'
 
 const logger = console
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function resolveUserIdFromCustomer(admin: any, customerId: string): Promise<string | null> {
+  if (!customerId) return null
+  const { data } = await admin
+    .from('users')
+    .select('id')
+    .eq('paddle_customer_id', customerId)
+    .maybeSingle()
+  return data?.id ?? null
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.text()
@@ -61,12 +72,43 @@ export async function POST(req: NextRequest) {
       const customerId: string = txn.customerId ?? ''
       const customData = txn.customData as Record<string, string> | null
       const supabaseUserId: string = customData?.supabase_user_id ?? ''
+
+      // Link paddle_customer_id on first transaction
       if (supabaseUserId && customerId) {
         await admin
           .from('users')
           .update({ paddle_customer_id: customerId })
           .eq('id', supabaseUserId)
           .is('paddle_customer_id', null)
+      }
+
+      // Credit pack one-time purchase — top up balance
+      const priceId: string = txn.items?.[0]?.price?.id ?? ''
+      const creditsToAdd = creditPackFromPriceId(priceId)
+      const userId = supabaseUserId || await resolveUserIdFromCustomer(admin, customerId)
+
+      if (creditsToAdd && userId) {
+        const { data: userData } = await admin
+          .from('users')
+          .select('credits_balance')
+          .eq('id', userId)
+          .single()
+
+        const current = (userData?.credits_balance as number) ?? 0
+        await admin
+          .from('users')
+          .update({ credits_balance: current + creditsToAdd })
+          .eq('id', userId)
+
+        await admin.from('credit_transactions').insert({
+          user_id: userId,
+          delta: creditsToAdd,
+          feature: null,
+          description: `Purchased ${creditsToAdd} credits`,
+          paddle_txn_id: txn.id ?? null,
+        })
+
+        logger.log(`[billing/paddle-webhook] credited ${creditsToAdd} to user=${userId}`)
       }
     }
   } catch (err) {

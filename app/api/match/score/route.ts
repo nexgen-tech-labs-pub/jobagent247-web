@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { getUserPlan } from '@/lib/db/users'
+import { getUserBillingContext } from '@/lib/db/users'
 import { checkQuota } from '@/lib/rate-limit'
 import { getJobById, upsertUserJobScore } from '@/lib/db/jobs'
 import { scoreJobMatch } from '@/lib/claude'
@@ -17,8 +17,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const plan = await getUserPlan(supabase, user.id)
-    const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'job_match')
+    const { plan, locale } = await getUserBillingContext(supabase, user.id)
+    const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'job_match', locale)
     if (!allowed) {
       return NextResponse.json({ error: 'Free plan allows 2 job matches. Upgrade for more.', remaining: 0 }, { status: 429 })
     }
