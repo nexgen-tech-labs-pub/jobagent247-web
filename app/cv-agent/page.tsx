@@ -24,6 +24,8 @@ function CVAgentInner() {
   const [upgradeRequired, setUpgradeRequired] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [exporting, setExporting] = useState(false)
+  const analyseAbortRef = useRef<AbortController | null>(null)
+  const improveAbortRef = useRef<AbortController | null>(null)
   const [tone, setTone] = useState<'formal' | 'direct' | 'enthusiastic'>('direct')
   const [generatingCL, setGeneratingCL] = useState(false)
   const [coverLetter, setCoverLetter] = useState('')
@@ -106,6 +108,11 @@ function CVAgentInner() {
   }
 
   const handleAnalyse = async () => {
+    if (loading) {
+      analyseAbortRef.current?.abort()
+      setLoading(false)
+      return
+    }
     if (!selectedCvId || !jobDescription.trim()) return
     setLoading(true)
     setError(null)
@@ -113,65 +120,85 @@ function CVAgentInner() {
     setImprovedCV('')
     setUpgradeRequired(false)
 
-    const res = await fetch('/api/cv/analyse', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cvId: selectedCvId, jobDescription, targetRole }),
-    })
+    const controller = new AbortController()
+    analyseAbortRef.current = controller
 
-    if (res.status === 429) {
-      setError('Daily limit reached. Upgrade your plan for more applications.')
-      setLoading(false)
-      return
-    }
-    if (!res.ok) {
-      const { error: msg } = await res.json()
-      setError(msg ?? 'Something went wrong')
-      setLoading(false)
-      return
-    }
+    try {
+      const res = await fetch('/api/cv/analyse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cvId: selectedCvId, jobDescription, targetRole }),
+        signal: controller.signal,
+      })
 
-    const data = await res.json()
-    setResult(data)
-    setLoading(false)
+      if (res.status === 429) {
+        setError('Daily limit reached. Upgrade your plan for more applications.')
+        return
+      }
+      if (!res.ok) {
+        const { error: msg } = await res.json()
+        setError(msg ?? 'Something went wrong')
+        return
+      }
+
+      const data = await res.json()
+      setResult(data)
+    } catch (e) {
+      if (e instanceof Error && e.name === 'AbortError') return
+      setError('Something went wrong')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleImprove = async () => {
+    if (improving) {
+      improveAbortRef.current?.abort()
+      setImproving(false)
+      return
+    }
     if (!selectedCvId || !jobDescription.trim() || !result) return
     setImproving(true)
     setImprovedCV('')
     setUpgradeRequired(false)
 
-    const res = await fetch('/api/cv/improve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cvId: selectedCvId, jobDescription, targetRole }),
-    })
+    const controller = new AbortController()
+    improveAbortRef.current = controller
 
-    if (res.status === 403) {
-      setUpgradeRequired(true)
-      setImproving(false)
-      return
-    }
-    if (res.status === 429) {
-      setError('Daily limit reached.')
-      setImproving(false)
-      return
-    }
-    if (!res.ok || !res.body) {
+    try {
+      const res = await fetch('/api/cv/improve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cvId: selectedCvId, jobDescription, targetRole }),
+        signal: controller.signal,
+      })
+
+      if (res.status === 403) {
+        setUpgradeRequired(true)
+        return
+      }
+      if (res.status === 429) {
+        setError('Daily limit reached.')
+        return
+      }
+      if (!res.ok || !res.body) {
+        setError('Failed to generate rewrite')
+        return
+      }
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        setImprovedCV((prev) => prev + decoder.decode(value))
+      }
+    } catch (e) {
+      if (e instanceof Error && e.name === 'AbortError') return
       setError('Failed to generate rewrite')
+    } finally {
       setImproving(false)
-      return
     }
-
-    const reader = res.body.getReader()
-    const decoder = new TextDecoder()
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      setImprovedCV((prev) => prev + decoder.decode(value))
-    }
-    setImproving(false)
   }
 
   const handleExport = async () => {
@@ -341,7 +368,7 @@ function CVAgentInner() {
             <h3 className="font-heading font-semibold text-white mb-2">3. Paste job description</h3>
             <textarea
               className="w-full h-48 px-4 py-3 rounded-xl text-sm outline-none resize-none"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: '#CBD5E1' }}
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: '#F8FAFC' }}
               placeholder="Paste the full job description here..."
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
@@ -396,9 +423,11 @@ function CVAgentInner() {
             size="lg"
             className="w-full justify-center"
             onClick={handleAnalyse}
-            disabled={loading || !selectedCvId || !jobDescription.trim()}
+            disabled={!loading && (!selectedCvId || !jobDescription.trim())}
           >
-            {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Analysing…</> : <><Zap className="w-4 h-4" /> Run CV Agent</>}
+            {loading
+              ? <><XCircle className="w-4 h-4" /> Cancel</>
+              : <><Zap className="w-4 h-4" /> Run CV Agent</>}
           </GradientButton>
         </div>
 
@@ -500,10 +529,9 @@ function CVAgentInner() {
                 size="sm"
                 className="flex-1 justify-center"
                 onClick={handleImprove}
-                disabled={improving}
               >
                 {improving
-                  ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Rewriting…</>
+                  ? <><XCircle className="w-3.5 h-3.5" /> Cancel</>
                   : <><ArrowRight className="w-3.5 h-3.5" /> Full CV Rewrite</>}
               </GradientButton>
             </div>

@@ -82,109 +82,134 @@ function gridHex(cx: number, cy: number, r: number): string {
 }
 
 function RadarChart({ breakdown }: { breakdown: ReadinessScoreBreakdown }) {
-  const cx = 160
+  const cx = 220
   const cy = 155
   const r = 100
   const values = RADAR_DIMS.map(k => breakdown[k])
-
-  // Label anchor offsets beyond the outer ring
-  const labelOffset = 30
+  const benchmarkValues = RADAR_DIMS.map(() => 100)
+  const labelOffset = 34
 
   return (
-    <svg viewBox="0 0 320 310" className="w-full max-w-xs mx-auto" aria-hidden="true">
-      {/* Grid rings at 20 / 40 / 60 / 80 / 100 */}
-      {[20, 40, 60, 80, 100].map(pct => (
-        <polygon
-          key={pct}
-          points={gridHex(cx, cy, r * pct / 100)}
-          fill="none"
-          stroke="rgba(255,255,255,0.08)"
-          strokeWidth="1"
-        />
-      ))}
-
-      {/* Grid ring labels (20, 40, 60, 80) */}
-      {[20, 40, 60, 80].map(pct => (
-        <text
-          key={pct}
-          x={cx + 4}
-          y={cy - r * pct / 100 + 4}
-          fontSize="8"
-          fill="rgba(255,255,255,0.25)"
-          textAnchor="middle"
-        >{pct}</text>
-      ))}
-
-      {/* Axis spokes */}
-      {RADAR_DIMS.map((_, i) => {
-        const angle = -Math.PI / 2 + (i * 2 * Math.PI) / 6
-        return (
-          <line
-            key={i}
-            x1={cx} y1={cy}
-            x2={cx + r * Math.cos(angle)}
-            y2={cy + r * Math.sin(angle)}
-            stroke="rgba(255,255,255,0.10)"
+    <div className="w-full max-w-sm mx-auto">
+      <svg viewBox="0 0 440 310" className="w-full" aria-hidden="true">
+        {/* Grid rings at 20 / 40 / 60 / 80 / 100 */}
+        {[20, 40, 60, 80, 100].map(pct => (
+          <polygon
+            key={pct}
+            points={gridHex(cx, cy, r * pct / 100)}
+            fill="none"
+            stroke={pct === 80 ? 'rgba(6,182,212,0.2)' : 'rgba(255,255,255,0.08)'}
             strokeWidth="1"
           />
-        )
-      })}
+        ))}
 
-      {/* Score polygon — filled */}
-      <polygon
-        points={polygonPoints(values, cx, cy, r)}
-        fill="rgba(139,92,246,0.22)"
-        stroke="#8B5CF6"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-
-      {/* Score dots */}
-      {RADAR_DIMS.map((_, i) => {
-        const angle = -Math.PI / 2 + (i * 2 * Math.PI) / 6
-        const v = (values[i] ?? 0) / 100
-        return (
-          <circle
-            key={i}
-            cx={cx + r * v * Math.cos(angle)}
-            cy={cy + r * v * Math.sin(angle)}
-            r="3"
-            fill="#8B5CF6"
-            stroke="rgba(139,92,246,0.4)"
-            strokeWidth="4"
-          />
-        )
-      })}
-
-      {/* Axis labels (multi-line via tspan) */}
-      {RADAR_DIMS.map((dim, i) => {
-        const angle = -Math.PI / 2 + (i * 2 * Math.PI) / 6
-        const lx = cx + (r + labelOffset) * Math.cos(angle)
-        const ly = cy + (r + labelOffset) * Math.sin(angle)
-        const lines = RADAR_LABELS[dim].split('\n')
-
-        // Nudge anchor for left-side labels
-        let anchor: 'start' | 'middle' | 'end' = 'middle'
-        if (lx < cx - 10) anchor = 'end'
-        else if (lx > cx + 10) anchor = 'start'
-
-        return (
+        {/* Grid ring labels (20, 40, 60, 80) */}
+        {[20, 40, 60, 80].map(pct => (
           <text
-            key={dim}
-            x={lx}
-            y={ly - (lines.length - 1) * 6}
-            textAnchor={anchor}
-            fontSize="9.5"
-            fill="rgba(203,213,225,0.85)"
-            fontFamily="Inter, sans-serif"
-          >
-            {lines.map((line, li) => (
-              <tspan key={li} x={lx} dy={li === 0 ? 0 : 13}>{line}</tspan>
-            ))}
-          </text>
-        )
-      })}
-    </svg>
+            key={pct}
+            x={cx + 4}
+            y={cy - r * pct / 100 + 4}
+            fontSize="8"
+            fill="rgba(255,255,255,0.25)"
+            textAnchor="middle"
+          >{pct}</text>
+        ))}
+
+        {/* Axis spokes */}
+        {RADAR_DIMS.map((_, i) => {
+          const angle = -Math.PI / 2 + (i * 2 * Math.PI) / 6
+          return (
+            <line
+              key={i}
+              x1={cx} y1={cy}
+              x2={cx + r * Math.cos(angle)}
+              y2={cy + r * Math.sin(angle)}
+              stroke="rgba(255,255,255,0.10)"
+              strokeWidth="1"
+            />
+          )
+        })}
+
+        {/* Benchmark polygon (100%) — dashed cyan, shows the gap */}
+        <polygon
+          points={polygonPoints(benchmarkValues, cx, cy, r)}
+          fill="rgba(6,182,212,0.06)"
+          stroke="rgba(6,182,212,0.5)"
+          strokeWidth="1.5"
+          strokeDasharray="5 3"
+          strokeLinejoin="round"
+        />
+
+        {/* Score polygon — filled violet */}
+        <polygon
+          points={polygonPoints(values, cx, cy, r)}
+          fill="rgba(139,92,246,0.22)"
+          stroke="#8B5CF6"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+
+        {/* Score dots */}
+        {RADAR_DIMS.map((_, i) => {
+          const angle = -Math.PI / 2 + (i * 2 * Math.PI) / 6
+          const v = (values[i] ?? 0) / 100
+          return (
+            <circle
+              key={i}
+              cx={cx + r * v * Math.cos(angle)}
+              cy={cy + r * v * Math.sin(angle)}
+              r="3"
+              fill="#8B5CF6"
+              stroke="rgba(139,92,246,0.4)"
+              strokeWidth="4"
+            />
+          )
+        })}
+
+        {/* Axis labels (multi-line via tspan) */}
+        {RADAR_DIMS.map((dim, i) => {
+          const angle = -Math.PI / 2 + (i * 2 * Math.PI) / 6
+          const lx = cx + (r + labelOffset) * Math.cos(angle)
+          const ly = cy + (r + labelOffset) * Math.sin(angle)
+          const lines = RADAR_LABELS[dim].split('\n')
+
+          let anchor: 'start' | 'middle' | 'end' = 'middle'
+          if (lx < cx - 10) anchor = 'end'
+          else if (lx > cx + 10) anchor = 'start'
+
+          return (
+            <text
+              key={dim}
+              x={lx}
+              y={ly - (lines.length - 1) * 6}
+              textAnchor={anchor}
+              fontSize="11"
+              fill="#CBD5E1"
+              fontFamily="Inter, sans-serif"
+              fontWeight="500"
+            >
+              {lines.map((line, li) => (
+                <tspan key={li} x={lx} dy={li === 0 ? 0 : 14}>{line}</tspan>
+              ))}
+            </text>
+          )
+        })}
+      </svg>
+
+      {/* Legend */}
+      <div className="flex items-center justify-center gap-5 -mt-2">
+        <div className="flex items-center gap-1.5">
+          <span className="inline-block w-5 h-0.5 rounded" style={{ background: '#8B5CF6' }} />
+          <span className="text-xs" style={{ color: '#94A3B8' }}>Your scores</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <svg width="20" height="4" className="inline-block">
+            <line x1="0" y1="2" x2="20" y2="2" stroke="rgba(6,182,212,0.7)" strokeWidth="1.5" strokeDasharray="4 2" />
+          </svg>
+          <span className="text-xs" style={{ color: '#94A3B8' }}>Benchmark (100)</span>
+        </div>
+      </div>
+    </div>
   )
 }
 

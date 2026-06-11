@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { GradientButton } from '@/components/ui/GradientButton'
@@ -351,6 +351,7 @@ export default function JobFitPage() {
   const [jobDescription, setJobDescription] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
   const [activeAnalysis, setActiveAnalysis] = useState<JobFitAnalysisWithJob | null>(null)
   const [savedAnalyses, setSavedAnalyses] = useState<JobFitAnalysisWithJob[]>([])
   const [loadingList, setLoadingList] = useState(false)
@@ -372,12 +373,19 @@ export default function JobFitPage() {
   }, [])
 
   const handleAnalyse = async () => {
+    if (loading) {
+      abortRef.current?.abort()
+      setLoading(false)
+      return
+    }
     if (!jobTitle.trim() || !jobDescription.trim()) {
       setError('Job title and description are required.')
       return
     }
     setError(null)
     setLoading(true)
+    const controller = new AbortController()
+    abortRef.current = controller
     try {
       const res = await fetch('/api/jobs/fit', {
         method: 'POST',
@@ -388,6 +396,7 @@ export default function JobFitPage() {
           companyName: companyName.trim() || undefined,
           jobUrl: jobUrl.trim() || undefined,
         }),
+        signal: controller.signal,
       })
       const data = await res.json() as { analysis: JobFitAnalysisWithJob; error?: string }
       if (!res.ok) {
@@ -397,7 +406,8 @@ export default function JobFitPage() {
       setActiveAnalysis(data.analysis)
       setSavedAnalyses(prev => [data.analysis, ...prev])
       setView('result')
-    } catch {
+    } catch (e) {
+      if (e instanceof Error && e.name === 'AbortError') return
       setError('Network error. Please try again.')
     } finally {
       setLoading(false)
@@ -475,9 +485,12 @@ export default function JobFitPage() {
               />
             </div>
             {error && <p className="text-sm" style={{ color: '#EF4444' }}>{error}</p>}
-            <GradientButton onClick={handleAnalyse} disabled={loading} className="w-full justify-center">
+            <GradientButton
+              onClick={handleAnalyse}
+              disabled={!loading && (!jobTitle.trim() || !jobDescription.trim())}
+              className="w-full justify-center">
               {loading
-                ? <><Loader2 className="w-4 h-4 animate-spin" /> Analysing fit…</>
+                ? <><XCircle className="w-4 h-4" /> Cancel</>
                 : <><Target className="w-4 h-4" /> Analyse Job Fit</>}
             </GradientButton>
             <p className="text-xs text-center" style={{ color: '#64748B' }}>
