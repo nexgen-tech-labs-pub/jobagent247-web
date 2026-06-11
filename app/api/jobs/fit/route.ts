@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       result
     )
 
-    return NextResponse.json({ analysis, savedJob, remaining })
+    return NextResponse.json({ analysis: result, savedJob, remaining })
   } catch (err) {
     console.error('job fit error', err)
     return NextResponse.json({ error: 'Analysis failed. Please try again.' }, { status: 500 })
