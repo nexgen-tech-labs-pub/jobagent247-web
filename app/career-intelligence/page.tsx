@@ -46,6 +46,150 @@ function scoreColor(score: number) {
   return '#EF4444'
 }
 
+// ─── Radar Chart ──────────────────────────────────────────────────────────────
+
+const RADAR_DIMS: (keyof ReadinessScoreBreakdown)[] = [
+  'technicalSkills',
+  'experienceMatch',
+  'evidenceStrength',
+  'industryMatch',
+  'interviewReadiness',
+  'profilePositioning',
+]
+
+const RADAR_LABELS: Record<keyof ReadinessScoreBreakdown, string> = {
+  technicalSkills:    'Technical\nSkills',
+  experienceMatch:    'Experience\nMatch',
+  evidenceStrength:   'Evidence\nStrength',
+  industryMatch:      'Industry\nMatch',
+  interviewReadiness: 'Interview\nReadiness',
+  profilePositioning: 'Profile\nPositioning',
+}
+
+function polygonPoints(values: number[], cx: number, cy: number, r: number): string {
+  return RADAR_DIMS.map((_, i) => {
+    const angle = -Math.PI / 2 + (i * 2 * Math.PI) / 6
+    const v = (values[i] ?? 0) / 100
+    return `${cx + r * v * Math.cos(angle)},${cy + r * v * Math.sin(angle)}`
+  }).join(' ')
+}
+
+function gridHex(cx: number, cy: number, r: number): string {
+  return RADAR_DIMS.map((_, i) => {
+    const angle = -Math.PI / 2 + (i * 2 * Math.PI) / 6
+    return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`
+  }).join(' ')
+}
+
+function RadarChart({ breakdown }: { breakdown: ReadinessScoreBreakdown }) {
+  const cx = 160
+  const cy = 155
+  const r = 100
+  const values = RADAR_DIMS.map(k => breakdown[k])
+
+  // Label anchor offsets beyond the outer ring
+  const labelOffset = 30
+
+  return (
+    <svg viewBox="0 0 320 310" className="w-full max-w-xs mx-auto" aria-hidden="true">
+      {/* Grid rings at 20 / 40 / 60 / 80 / 100 */}
+      {[20, 40, 60, 80, 100].map(pct => (
+        <polygon
+          key={pct}
+          points={gridHex(cx, cy, r * pct / 100)}
+          fill="none"
+          stroke="rgba(255,255,255,0.08)"
+          strokeWidth="1"
+        />
+      ))}
+
+      {/* Grid ring labels (20, 40, 60, 80) */}
+      {[20, 40, 60, 80].map(pct => (
+        <text
+          key={pct}
+          x={cx + 4}
+          y={cy - r * pct / 100 + 4}
+          fontSize="8"
+          fill="rgba(255,255,255,0.25)"
+          textAnchor="middle"
+        >{pct}</text>
+      ))}
+
+      {/* Axis spokes */}
+      {RADAR_DIMS.map((_, i) => {
+        const angle = -Math.PI / 2 + (i * 2 * Math.PI) / 6
+        return (
+          <line
+            key={i}
+            x1={cx} y1={cy}
+            x2={cx + r * Math.cos(angle)}
+            y2={cy + r * Math.sin(angle)}
+            stroke="rgba(255,255,255,0.10)"
+            strokeWidth="1"
+          />
+        )
+      })}
+
+      {/* Score polygon — filled */}
+      <polygon
+        points={polygonPoints(values, cx, cy, r)}
+        fill="rgba(139,92,246,0.22)"
+        stroke="#8B5CF6"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+
+      {/* Score dots */}
+      {RADAR_DIMS.map((_, i) => {
+        const angle = -Math.PI / 2 + (i * 2 * Math.PI) / 6
+        const v = (values[i] ?? 0) / 100
+        return (
+          <circle
+            key={i}
+            cx={cx + r * v * Math.cos(angle)}
+            cy={cy + r * v * Math.sin(angle)}
+            r="3"
+            fill="#8B5CF6"
+            stroke="rgba(139,92,246,0.4)"
+            strokeWidth="4"
+          />
+        )
+      })}
+
+      {/* Axis labels (multi-line via tspan) */}
+      {RADAR_DIMS.map((dim, i) => {
+        const angle = -Math.PI / 2 + (i * 2 * Math.PI) / 6
+        const lx = cx + (r + labelOffset) * Math.cos(angle)
+        const ly = cy + (r + labelOffset) * Math.sin(angle)
+        const lines = RADAR_LABELS[dim].split('\n')
+
+        // Nudge anchor for left-side labels
+        let anchor: 'start' | 'middle' | 'end' = 'middle'
+        if (lx < cx - 10) anchor = 'end'
+        else if (lx > cx + 10) anchor = 'start'
+
+        return (
+          <text
+            key={dim}
+            x={lx}
+            y={ly - (lines.length - 1) * 6}
+            textAnchor={anchor}
+            fontSize="9.5"
+            fill="rgba(203,213,225,0.85)"
+            fontFamily="Inter, sans-serif"
+          >
+            {lines.map((line, li) => (
+              <tspan key={li} x={lx} dy={li === 0 ? 0 : 13}>{line}</tspan>
+            ))}
+          </text>
+        )
+      })}
+    </svg>
+  )
+}
+
+// ─── Score Bar ─────────────────────────────────────────────────────────────────
+
 function ScoreBar({ label, value, weight }: { label: string; value: number; weight: number }) {
   return (
     <div className="space-y-1.5">
@@ -154,7 +298,8 @@ function ReportView({ analysis, onBack }: { analysis: ReadinessAnalysis; onBack:
         <h3 className="font-heading font-semibold text-white mb-4 flex items-center gap-2">
           <BarChart3 className="w-4 h-4" style={{ color: '#8B5CF6' }} /> Score Breakdown
         </h3>
-        <div className="space-y-3">
+        <RadarChart breakdown={analysis.score_breakdown} />
+        <div className="mt-5 space-y-3">
           {(Object.entries(analysis.score_breakdown) as [keyof ReadinessScoreBreakdown, number][]).map(([key, val]) => (
             <ScoreBar key={key} label={DIMENSION_LABELS[key]} value={val} weight={DIMENSION_WEIGHTS[key]} />
           ))}
