@@ -16,59 +16,68 @@ const MILESTONE_CONFIG = [
 
 function MilestoneCard({ config, milestone }: { config: typeof MILESTONE_CONFIG[0]; milestone: GrowthMilestone }) {
   return (
-    <GlassCard className="p-5">
-      <div className="flex items-center gap-3 mb-3">
-        <div
-          className="w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0"
-          style={{ background: config.bg, border: `1px solid ${config.border}` }}
-        >
-          <span className="font-heading font-bold text-sm leading-none" style={{ color: config.color }}>{config.label}</span>
-          <span className="text-xs leading-none mt-0.5" style={{ color: config.color, opacity: 0.7 }}>{config.subtitle}</span>
+    <GlassCard className="overflow-hidden">
+      {/* Coloured header band */}
+      <div className="px-6 py-4" style={{ background: config.bg, borderBottom: `1px solid ${config.border}` }}>
+        <div className="flex items-center gap-3">
+          <span
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-heading font-bold shrink-0"
+            style={{ background: config.border, color: config.color }}
+          >
+            {config.label} · {config.subtitle}
+          </span>
+          <h3 className="font-heading font-bold text-base text-white leading-snug">{milestone.title}</h3>
         </div>
-        <div>
-          <h3 className="font-heading font-semibold text-white text-sm">{milestone.title}</h3>
-          <p className="text-xs mt-0.5" style={{ color: '#94A3B8' }}>{milestone.description}</p>
-        </div>
+        <p className="text-sm mt-2 leading-relaxed" style={{ color: '#E2E8F0' }}>{milestone.description}</p>
       </div>
 
-      <div className="space-y-3">
+      {/* Body */}
+      <div className="px-6 py-5 space-y-5">
         {milestone.actions.length > 0 && (
           <div>
-            <p className="text-xs font-semibold mb-1.5 flex items-center gap-1.5" style={{ color: config.color }}>
-              <Target className="w-3 h-3" /> Actions
+            <p className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: config.color }}>
+              <Target className="w-4 h-4" /> Actions
             </p>
-            <ul className="space-y-1">
+            <ul className="space-y-2">
               {milestone.actions.map((a, i) => (
-                <li key={i} className="flex items-start gap-1.5 text-xs" style={{ color: '#CBD5E1' }}>
-                  <CheckCircle className="w-3 h-3 mt-0.5 shrink-0" style={{ color: config.color }} /> {a}
+                <li key={i} className="flex items-start gap-2 text-sm leading-relaxed" style={{ color: '#F1F5F9' }}>
+                  <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: config.color }} />
+                  <span>{a}</span>
                 </li>
               ))}
             </ul>
           </div>
         )}
+
         {milestone.skills.length > 0 && (
           <div>
-            <p className="text-xs font-semibold mb-1.5 flex items-center gap-1.5" style={{ color: '#F59E0B' }}>
-              <BookOpen className="w-3 h-3" /> Skills to build
+            <p className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: '#F59E0B' }}>
+              <BookOpen className="w-4 h-4" /> Skills to build
             </p>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-2">
               {milestone.skills.map((s, i) => (
-                <span key={i} className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(245,158,11,0.1)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.2)' }}>
+                <span
+                  key={i}
+                  className="text-sm px-3 py-1 rounded-full font-medium"
+                  style={{ background: 'rgba(245,158,11,0.12)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.3)' }}
+                >
                   {s}
                 </span>
               ))}
             </div>
           </div>
         )}
+
         {milestone.evidenceToCreate.length > 0 && (
           <div>
-            <p className="text-xs font-semibold mb-1.5 flex items-center gap-1.5" style={{ color: '#8B5CF6' }}>
-              <Code className="w-3 h-3" /> Evidence to create
+            <p className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: '#A78BFA' }}>
+              <Code className="w-4 h-4" /> Evidence to create
             </p>
-            <ul className="space-y-1">
+            <ul className="space-y-2">
               {milestone.evidenceToCreate.map((e, i) => (
-                <li key={i} className="flex items-start gap-1.5 text-xs" style={{ color: '#CBD5E1' }}>
-                  <span className="mt-0.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: '#8B5CF6' }} /> {e}
+                <li key={i} className="flex items-start gap-2 text-sm leading-relaxed" style={{ color: '#F1F5F9' }}>
+                  <span className="mt-2 w-2 h-2 rounded-full shrink-0" style={{ background: '#A78BFA' }} />
+                  <span>{e}</span>
                 </li>
               ))}
             </ul>
@@ -164,18 +173,19 @@ export default function CareerGrowthPage() {
 
         {plan && (
           <>
-            <GlassCard className="p-5">
-              <p className="text-sm leading-relaxed" style={{ color: '#CBD5E1' }}>{plan.summary}</p>
-              <div className="grid sm:grid-cols-2 gap-4 mt-4">
+            <GlassCard className="p-6">
+              <p className="text-base leading-relaxed font-medium" style={{ color: '#F1F5F9' }}>{plan.summary}</p>
+              <div className="grid sm:grid-cols-2 gap-6 mt-5">
                 {plan.quickWins.length > 0 && (
                   <div>
-                    <p className="text-xs font-semibold mb-2 flex items-center gap-1.5" style={{ color: '#22C55E' }}>
-                      <Zap className="w-3 h-3" /> Quick wins this week
+                    <p className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: '#4ADE80' }}>
+                      <Zap className="w-4 h-4" /> Quick wins this week
                     </p>
-                    <ul className="space-y-1">
+                    <ul className="space-y-2">
                       {plan.quickWins.map((w, i) => (
-                        <li key={i} className="flex items-start gap-1.5 text-xs" style={{ color: '#CBD5E1' }}>
-                          <CheckCircle className="w-3 h-3 mt-0.5 shrink-0" style={{ color: '#22C55E' }} /> {w}
+                        <li key={i} className="flex items-start gap-2 text-sm leading-relaxed" style={{ color: '#F1F5F9' }}>
+                          <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: '#4ADE80' }} />
+                          <span>{w}</span>
                         </li>
                       ))}
                     </ul>
@@ -183,13 +193,14 @@ export default function CareerGrowthPage() {
                 )}
                 {plan.keyRisks.length > 0 && (
                   <div>
-                    <p className="text-xs font-semibold mb-2 flex items-center gap-1.5" style={{ color: '#EF4444' }}>
-                      <AlertTriangle className="w-3 h-3" /> Key risks
+                    <p className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: '#F87171' }}>
+                      <AlertTriangle className="w-4 h-4" /> Key risks
                     </p>
-                    <ul className="space-y-1">
+                    <ul className="space-y-2">
                       {plan.keyRisks.map((r, i) => (
-                        <li key={i} className="flex items-start gap-1.5 text-xs" style={{ color: '#CBD5E1' }}>
-                          <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" style={{ color: '#EF4444' }} /> {r}
+                        <li key={i} className="flex items-start gap-2 text-sm leading-relaxed" style={{ color: '#F1F5F9' }}>
+                          <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" style={{ color: '#F87171' }} />
+                          <span>{r}</span>
                         </li>
                       ))}
                     </ul>
