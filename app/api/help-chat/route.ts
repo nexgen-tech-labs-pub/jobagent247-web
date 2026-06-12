@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { answerHelpQuery } from '@/lib/claude'
-import knowledgeRaw from '@/resources/help-knowledge.json'
+import knowledgeRaw from './help-knowledge.json'
 
 interface KnowledgeEntry {
   id: string

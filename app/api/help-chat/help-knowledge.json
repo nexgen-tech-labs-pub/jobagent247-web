@@ -1,0 +1,121 @@
+[
+  {
+    "id": "what-is",
+    "category": "product",
+    "question": "What is JobAgent247?",
+    "content": "JobAgent247 is an AI-powered job search platform that helps job seekers improve CVs, find matching jobs, write cover letters, prepare for interviews, and track applications — all in one place.",
+    "keywords": ["what", "is", "jobagent247", "platform", "overview", "about", "how"]
+  },
+  {
+    "id": "cv-agent",
+    "category": "feature",
+    "question": "How does the CV Agent work?",
+    "content": "The CV Agent analyses your uploaded CV against a job description and gives you an ATS score from 0 to 100, highlights missing keywords, rewrites weak bullet points, and can generate a fully rewritten CV targeting a 90+ ATS score. Upload a CV in the CV Agent section, paste a job description, and click Run CV Agent.",
+    "keywords": ["cv", "resume", "agent", "ats", "score", "rewrite", "improve", "upload", "analyse"]
+  },
+  {
+    "id": "job-matches",
+    "category": "feature",
+    "question": "How does job matching work?",
+    "content": "Job Matches shows you live job listings scraped from multiple job portals. You can search by keyword and type, trigger a fresh job search using the Find Jobs button, and see a match score for each job based on your CV. Click Analyse to get a detailed breakdown of how well you fit each role.",
+    "keywords": ["job", "match", "search", "find", "score", "scrape", "listing", "portal"]
+  },
+  {
+    "id": "job-fit",
+    "category": "feature",
+    "question": "What is Job Fit analysis?",
+    "content": "Job Fit analysis gives you a detailed 0-100 fit score across 8 dimensions: technical skills, experience seniority, evidence strength, domain match, location compatibility, salary fit, visa compatibility, and career trajectory. Paste a job description and click Analyse Job Fit to see your full breakdown.",
+    "keywords": ["job fit", "fit score", "dimension", "breakdown", "analyse", "technical", "seniority"]
+  },
+  {
+    "id": "cover-letter",
+    "category": "feature",
+    "question": "How do I generate a cover letter?",
+    "content": "In the CV Agent section, select your CV, enter the target role, paste the job description, choose a tone (formal, direct, or enthusiastic), and click Cover Letter. The cover letter streams directly onto the page and can be copied. You must fill in the Target Role field for this button to work.",
+    "keywords": ["cover letter", "generate", "write", "tone", "formal", "direct", "enthusiastic"]
+  },
+  {
+    "id": "recruiter-message",
+    "category": "feature",
+    "question": "How do I generate a recruiter message?",
+    "content": "In the CV Agent section, select your CV, enter the target role, paste the job description, and click Recruiter Message. JobAgent247 generates a concise 150-word LinkedIn InMail or outreach message. You must fill in the Target Role field for this button to work.",
+    "keywords": ["recruiter", "message", "linkedin", "outreach", "inmail", "contact"]
+  },
+  {
+    "id": "interview-prep",
+    "category": "feature",
+    "question": "How does Interview Prep work?",
+    "content": "The Interview Prep agent generates a full interview kit including 25+ tailored questions across technical, behavioural, scenario, and leadership categories, STAR framework guidance, likely interview stages, and a preparation checklist. Paste a job description and click Generate Interview Kit.",
+    "keywords": ["interview", "prep", "preparation", "questions", "star", "behavioural", "technical", "kit"]
+  },
+  {
+    "id": "career-intelligence",
+    "category": "feature",
+    "question": "What is Career Intelligence?",
+    "content": "Career Intelligence runs a deep readiness assessment scoring you across 6 dimensions: technical skills, experience match, evidence strength, industry match, interview readiness, and profile positioning. It identifies critical gaps, important gaps, and nice-to-have improvements with specific actionable recommendations.",
+    "keywords": ["career intelligence", "readiness", "score", "gap", "skills", "assessment", "dimensions"]
+  },
+  {
+    "id": "applications",
+    "category": "feature",
+    "question": "How does application tracking work?",
+    "content": "The Applications board lets you track jobs across five stages: Saved, Applied, Interviewing, Offered, and Rejected. You can add notes, set follow-up dates, and update status as your application progresses. Jobs added via Job Fit analysis or the Analyse page are automatically saved.",
+    "keywords": ["applications", "tracker", "tracking", "board", "kanban", "saved", "applied", "interviewing", "status"]
+  },
+  {
+    "id": "pricing-free",
+    "category": "pricing",
+    "question": "What is on the Free plan?",
+    "content": "The Free plan costs £0/month and includes 1 CV upload, basic CV feedback, 3 job description analyses, basic job tracker, and limited AI generations (5 per day).",
+    "keywords": ["free", "plan", "price", "cost", "limit", "£0"]
+  },
+  {
+    "id": "pricing-pro",
+    "category": "pricing",
+    "question": "What is on the Pro plan?",
+    "content": "The Pro plan costs £9.99/month and includes unlimited CV uploads, unlimited match scoring, cover letter generation, full application tracker, and 100 AI generations per day.",
+    "keywords": ["pro", "plan", "price", "£9.99", "upgrade", "unlimited"]
+  },
+  {
+    "id": "pricing-accelerator",
+    "category": "pricing",
+    "question": "What is on the Career Accelerator plan?",
+    "content": "The Career Accelerator plan costs £29.99/month and includes everything in Pro plus multiple CV versions, mock interview preparation, document export (DOCX/PDF), and unlimited AI generations.",
+    "keywords": ["career accelerator", "accelerator", "£29.99", "plan", "mock interview", "export", "unlimited"]
+  },
+  {
+    "id": "no-guarantee",
+    "category": "disclaimer",
+    "question": "Does JobAgent247 guarantee a job?",
+    "content": "JobAgent247 does not guarantee interviews, job offers, employment, recruiter responses, or any specific career outcome. The platform is designed to increase your chances, improve application quality, and save time — but outcomes depend on many factors outside our control.",
+    "keywords": ["guarantee", "promise", "ensure", "job offer", "employment", "interview", "result"]
+  },
+  {
+    "id": "privacy",
+    "category": "privacy",
+    "question": "How is my data used?",
+    "content": "Your CV text and profile data are used only to power the AI agents within your account. JobAgent247 does not sell your data to recruiters, employers, or third parties. You can delete your account and data at any time from Settings.",
+    "keywords": ["data", "privacy", "gdpr", "personal", "sell", "share", "delete", "account"]
+  },
+  {
+    "id": "contact",
+    "category": "support",
+    "question": "How do I contact support?",
+    "content": "For support, feedback, complaints, or questions not answered here, email media@jobsagent007.com. We aim to respond within 2 business days.",
+    "keywords": ["contact", "support", "help", "email", "complaint", "feedback", "problem"]
+  },
+  {
+    "id": "cv-upload",
+    "category": "howto",
+    "question": "How do I upload my CV?",
+    "content": "Go to CV Agent and click 'Upload different CV'. Accepted formats are PDF and DOCX. Your CV text is extracted automatically and used by all AI agents. You can upload multiple CV versions and mark one as primary.",
+    "keywords": ["upload", "cv", "resume", "pdf", "docx", "file", "how to", "add"]
+  },
+  {
+    "id": "affiliates",
+    "category": "disclaimer",
+    "question": "Is JobAgent247 connected to recruiters or employers?",
+    "content": "JobAgent247 is not affiliated with, endorsed by, or connected to any recruiter, employer, hiring manager, staffing agency, or job board. JobAgent247 is an independent tool to help you prepare your applications.",
+    "keywords": ["recruiter", "employer", "affiliated", "connected", "partner", "endorsement"]
+  }
+]

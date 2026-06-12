@@ -30,23 +30,27 @@ export default function ApplicationInsightsPage() {
   const [insights, setInsights] = useState<ApplicationInsights | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [refreshKey, setRefreshKey] = useState(0)
 
-  const load = async () => {
+  useEffect(() => {
+    let alive = true
+    fetch('/api/applications/insights')
+      .then(res => res.json().then((data: { insights?: ApplicationInsights; error?: string }) => {
+        if (!alive) return
+        if (!res.ok) setError(data.error ?? 'Failed to load insights')
+        else setInsights(data.insights!)
+      }))
+      .catch(() => { if (alive) setError('Network error. Please try again.') })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
+  }, [refreshKey])
+
+  const refresh = () => {
     setLoading(true)
     setError(null)
-    try {
-      const res = await fetch('/api/applications/insights')
-      const data = await res.json() as { insights?: ApplicationInsights; error?: string }
-      if (!res.ok) { setError(data.error ?? 'Failed to load insights'); return }
-      setInsights(data.insights!)
-    } catch {
-      setError('Network error. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+    setInsights(null)
+    setRefreshKey(k => k + 1)
   }
-
-  useEffect(() => { void load() }, [])
 
   return (
     <DashboardLayout title="Application Insights">
@@ -60,7 +64,7 @@ export default function ApplicationInsightsPage() {
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Applications
           </button>
           {insights && (
-            <SecondaryButton size="sm" onClick={load} disabled={loading}>
+            <SecondaryButton size="sm" onClick={refresh} disabled={loading}>
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Refresh
             </SecondaryButton>
           )}
@@ -80,7 +84,7 @@ export default function ApplicationInsightsPage() {
                 Go to Applications
               </GradientButton>
             ) : (
-              <SecondaryButton size="sm" onClick={load}>Try Again</SecondaryButton>
+              <SecondaryButton size="sm" onClick={refresh}>Try Again</SecondaryButton>
             )}
           </GlassCard>
         )}
