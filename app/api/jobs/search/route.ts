@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Redis } from '@upstash/redis'
 import { createServerClient } from '@/lib/supabase'
+import { extractProfileSkills } from '@/lib/claude'
+import { sortJobsByRelevance } from '@/lib/profile-matching'
+import type { Job } from '@/lib/types/database'
 
 const logger = console  // swap for Sentry logger in Phase 5
 
@@ -72,7 +75,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const jobs = (data ?? []).map(j => {
+  let jobs = (data ?? []).map(j => {
     const userJobs = Array.isArray(j.user_jobs) ? j.user_jobs as UserJobRow[] : []
     const uj = userJobs[0] ?? null
     return {
@@ -83,6 +86,26 @@ export async function GET(request: NextRequest) {
       user_job_id: uj?.id ?? null,
     }
   }).filter(j => minScore === 0 || (j.match_score ?? 0) >= minScore)
+
+  try {
+    const { data: cv } = await supabase
+      .from('cvs')
+      .select('raw_text')
+      .eq('user_id', user.id)
+      .eq('is_primary', true)
+      .single()
+
+    if (cv?.raw_text) {
+      const skills = await extractProfileSkills(cv.raw_text)
+      const unscored = jobs.filter(j => j.match_score === null)
+      const scored   = jobs.filter(j => j.match_score !== null)
+      const rankedUnscored = sortJobsByRelevance(unscored as unknown as Job[], skills)
+        .map(j => unscored.find(u => u.id === j.id)!)
+      jobs = [...scored.sort((a, b) => (b.match_score ?? 0) - (a.match_score ?? 0)), ...rankedUnscored]
+    }
+  } catch {
+    // Degrade gracefully — profile ranking is non-critical
+  }
 
   const result = { jobs, total: count ?? 0, page }
   try {

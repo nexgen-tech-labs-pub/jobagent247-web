@@ -356,6 +356,45 @@ export interface CreditTransaction {
   created_at: string
 }
 
+export interface ProfileSkills {
+  topSkills: string[]
+  experienceLevel: 'junior' | 'mid' | 'senior' | 'staff' | 'principal'
+  preferredDomains: string[]
+  yearsExperience: number | null
+  extractedAt: string
+}
+
+export interface GrowthMilestone {
+  title: string
+  description: string
+  actions: string[]
+  skills: string[]
+  evidenceToCreate: string[]
+}
+
+export interface GrowthPlan {
+  targetRole: string
+  currentReadinessScore: number | null
+  summary: string
+  quickWins: string[]
+  keyRisks: string[]
+  day30: GrowthMilestone
+  day60: GrowthMilestone
+  day90: GrowthMilestone
+}
+
+export interface ApplicationInsights {
+  totalApplications: number
+  outcomeBreakdown: Record<ApplicationStatus, number>
+  responseRate: number
+  avgMatchScoreByOutcome: Partial<Record<ApplicationStatus, number>>
+  topMissingSkills: string[]
+  rejectionPatterns: string[]
+  strongPerformingAreas: string[]
+  recommendations: string[]
+  summary: string
+}
+
 export interface Database {
   public: {
     Tables: {

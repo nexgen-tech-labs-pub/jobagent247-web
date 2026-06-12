@@ -12,6 +12,8 @@ export type QuotaFeature =
   | 'interview_kit'
   | 'career_readiness'
   | 'job_fit'
+  | 'career_growth'
+  | 'app_insights'
 
 // UK free-tier lifetime quotas
 const FREE_LIMITS: Record<QuotaFeature, number> = {
@@ -26,6 +28,8 @@ const FREE_LIMITS: Record<QuotaFeature, number> = {
   interview_kit:     1,
   career_readiness:  1,
   job_fit:           2,
+  career_growth:     1,
+  app_insights:      1,
 }
 
 // India PAYG credit cost per feature
@@ -41,6 +45,8 @@ const INDIA_CREDIT_COSTS: Record<QuotaFeature, number> = {
   interview_kit:      3,
   career_readiness:   2,
   job_fit:            1,
+  career_growth:      3,
+  app_insights:       2,
 }
 
 export async function checkQuota(

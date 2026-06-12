@@ -4,6 +4,12 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Client = SupabaseClient<any>
 
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+// Cache classification results for 1 hour — same title+description always maps to the same domain/seniority
+const classifyCache = new Map<string, { result: { domain: string; seniority: string }; expiresAt: number }>()
+const CLASSIFY_TTL_MS = 60 * 60 * 1000
+
 export interface RoleProfile {
   id: string
   domain: string
@@ -47,9 +53,10 @@ export async function classifyRole(
   jobTitle: string,
   jobDescription: string
 ): Promise<{ domain: string; seniority: string }> {
-  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-
   const snippet = jobDescription.slice(0, 800)
+  const cacheKey = `${jobTitle}::${snippet}`
+  const cached = classifyCache.get(cacheKey)
+  if (cached && cached.expiresAt > Date.now()) return cached.result
 
   const response = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
@@ -70,7 +77,9 @@ export async function classifyRole(
   }
 
   const raw = toolUse.input as { domain: string; seniority: string }
-  return { domain: raw.domain, seniority: raw.seniority }
+  const result = { domain: raw.domain, seniority: raw.seniority }
+  classifyCache.set(cacheKey, { result, expiresAt: Date.now() + CLASSIFY_TTL_MS })
+  return result
 }
 
 export async function getRoleProfile(

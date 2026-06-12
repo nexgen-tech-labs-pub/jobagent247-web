@@ -3,6 +3,7 @@ import { Space_Grotesk, Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
+import { HelpChat } from "@/components/help/HelpChat";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -51,7 +52,10 @@ export default function RootLayout({
     >
       <body className="min-h-full antialiased">
         <Script id="theme-init" strategy="beforeInteractive" src="/theme-init.js" />
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          {children}
+          <HelpChat />
+        </ThemeProvider>
       </body>
     </html>
   );

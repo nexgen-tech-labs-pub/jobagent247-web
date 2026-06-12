@@ -224,7 +224,11 @@ function CVAgentInner() {
   }
 
   const handleCoverLetter = async () => {
-    if (!selectedCvId || !jobDescription.trim() || !targetRole.trim()) return
+    if (!selectedCvId || !jobDescription.trim()) return
+    if (!targetRole.trim()) {
+      setError('Please enter a target role (field 2 above) before generating a cover letter.')
+      return
+    }
     setGeneratingCL(true)
     setCoverLetter('')
     setError(null)
@@ -262,7 +266,11 @@ function CVAgentInner() {
   }
 
   const handleRecruiterMessage = async () => {
-    if (!selectedCvId || !jobDescription.trim() || !targetRole.trim()) return
+    if (!selectedCvId || !jobDescription.trim()) return
+    if (!targetRole.trim()) {
+      setError('Please enter a target role (field 2 above) before generating a recruiter message.')
+      return
+    }
     setGeneratingRM(true)
     setRecruiterMessage('')
     setError(null)
@@ -395,7 +403,7 @@ function CVAgentInner() {
               size="sm"
               className="flex-1 justify-center"
               onClick={handleCoverLetter}
-              disabled={generatingCL || !selectedCvId || !jobDescription.trim() || !targetRole.trim()}
+              disabled={generatingCL || !selectedCvId || !jobDescription.trim()}
             >
               {generatingCL
                 ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Writing…</>
@@ -405,7 +413,7 @@ function CVAgentInner() {
               size="sm"
               className="flex-1 justify-center"
               onClick={handleRecruiterMessage}
-              disabled={generatingRM || !selectedCvId || !jobDescription.trim() || !targetRole.trim()}
+              disabled={generatingRM || !selectedCvId || !jobDescription.trim()}
             >
               {generatingRM
                 ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Writing…</>

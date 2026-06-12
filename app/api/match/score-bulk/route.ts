@@ -39,9 +39,9 @@ export async function POST(request: NextRequest) {
 
     const { data: jobRows } = await supabase
       .from('jobs')
-      .select('*')
+      .select('id, title, description')
       .in('id', body.jobIds)
-    const jobs = (jobRows ?? []) as Job[]
+    const jobs = (jobRows ?? []) as Pick<Job, 'id' | 'title' | 'description'>[]
 
     const results = await Promise.all(
       jobs.map(async (job) => {

@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { GlassCard } from '@/components/ui/GlassCard'
+import { SecondaryButton } from '@/components/ui/SecondaryButton'
 import { getBrowserClient } from '@/lib/supabase-browser'
 import type { UserJobWithJob, ApplicationStatus } from '@/lib/types/database'
-import { Building2, Calendar, MapPin, Trash2, ChevronDown, Check, X, Plus } from 'lucide-react'
+import { Building2, Calendar, MapPin, Trash2, ChevronDown, Check, X, Plus, BarChart2 } from 'lucide-react'
 
 type AppStatus = ApplicationStatus
 
@@ -23,6 +25,7 @@ interface EditDraft {
 }
 
 export default function ApplicationsPage() {
+  const router = useRouter()
   const [items, setItems] = useState<UserJobWithJob[]>([])
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
@@ -142,17 +145,22 @@ export default function ApplicationsPage() {
             `${items.length} total application${items.length !== 1 ? 's' : ''}`
           )}
         </p>
-        <a
-          href="/job-matches"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-full"
-          style={{
-            background: 'linear-gradient(135deg, #8B5CF6, #06B6D4)',
-            color: '#fff',
-            boxShadow: '0 8px 24px rgba(139,92,246,0.3)',
-          }}
-        >
+        <div className="flex items-center gap-2">
+          <SecondaryButton size="sm" onClick={() => router.push('/applications/insights')}>
+            <BarChart2 className="w-3.5 h-3.5" /> View Insights
+          </SecondaryButton>
+          <a
+            href="/job-matches"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-full"
+            style={{
+              background: 'linear-gradient(135deg, #8B5CF6, #06B6D4)',
+              color: '#fff',
+              boxShadow: '0 8px 24px rgba(139,92,246,0.3)',
+            }}
+          >
           <Plus className="w-3.5 h-3.5" /> Find Jobs
-        </a>
+          </a>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-start">
