@@ -5,15 +5,8 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { GradientButton } from '@/components/ui/GradientButton'
 import { SecondaryButton } from '@/components/ui/SecondaryButton'
-import { usePaddleCheckout } from '@/components/ui/PaddleCheckout'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Check, Zap, Shield, Coins } from 'lucide-react'
-
-const CREDIT_PACKS = [
-  { label: '10 credits', price: '₹99',  priceId: process.env.NEXT_PUBLIC_PADDLE_CREDITS_10_INR ?? '' },
-  { label: '25 credits', price: '₹199', priceId: process.env.NEXT_PUBLIC_PADDLE_CREDITS_25_INR ?? '' },
-  { label: '60 credits', price: '₹399', priceId: process.env.NEXT_PUBLIC_PADDLE_CREDITS_60_INR ?? '' },
-]
+import { Check, Zap, Shield } from 'lucide-react'
 
 interface SettingsClientProps {
   name: string
@@ -24,34 +17,13 @@ interface SettingsClientProps {
   creditsBalance: number
 }
 
-export function SettingsClient({ name, email, location, plan, locale, creditsBalance }: SettingsClientProps) {
+export function SettingsClient({ name, email, location, plan, locale }: SettingsClientProps) {
   const [saved, setSaved] = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
-  const [creditLoading, setCreditLoading] = useState<string | null>(null)
-  const { openCheckout } = usePaddleCheckout()
 
   const handleSave = () => {
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
-  }
-
-  const handleCreditPack = async (priceId: string) => {
-    if (!priceId) return
-    setCreditLoading(priceId)
-    try {
-      const res = await fetch('/api/billing/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ creditPackPriceId: priceId }),
-      })
-      const data = await res.json() as { provider?: string; transactionId?: string; error?: string }
-      if (!res.ok || data.error) throw new Error(data.error ?? 'Checkout failed')
-      if (data.provider === 'paddle' && data.transactionId) {
-        openCheckout(data.transactionId)
-      }
-    } finally {
-      setCreditLoading(null)
-    }
   }
 
   const handleCheckout = async (planKey: string) => {
@@ -62,12 +34,10 @@ export function SettingsClient({ name, email, location, plan, locale, creditsBal
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan: planKey, interval: 'month' }),
       })
-      const data = await res.json() as { provider?: string; url?: string; transactionId?: string; error?: string }
+      const data = await res.json() as { url?: string; error?: string }
       if (!res.ok || data.error) throw new Error(data.error ?? 'Checkout failed')
-      if (data.provider === 'stripe' && data.url) {
+      if (data.url) {
         window.location.href = data.url
-      } else if (data.provider === 'paddle' && data.transactionId) {
-        openCheckout(data.transactionId)
       }
     } finally {
       setCheckoutLoading(null)
@@ -168,32 +138,6 @@ export function SettingsClient({ name, email, location, plan, locale, creditsBal
                 </span>
               </div>
 
-              {plan === 'free' && locale === 'in' && (
-                <div className="rounded-xl p-5 mb-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)' }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Coins className="w-4 h-4" style={{ color: '#F59E0B' }} />
-                    <span className="font-heading font-semibold text-white">Your Credit Balance</span>
-                    <span className="ml-auto text-lg font-bold" style={{ color: '#F59E0B' }}>{creditsBalance} credits</span>
-                  </div>
-                  <p className="text-xs mb-4" style={{ color: '#94A3B8' }}>Pay per use — buy credits to access AI features without a monthly subscription.</p>
-                  <div className="grid grid-cols-3 gap-3">
-                    {CREDIT_PACKS.map(pack => (
-                      <button
-                        key={pack.priceId || pack.label}
-                        disabled={!pack.priceId || creditLoading === pack.priceId}
-                        onClick={() => handleCreditPack(pack.priceId)}
-                        className="flex flex-col items-center gap-1 p-3 rounded-xl text-sm font-medium transition-all disabled:opacity-40"
-                        style={{ background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.3)', color: '#F59E0B' }}
-                      >
-                        <span className="font-bold">{pack.label}</span>
-                        <span className="text-xs" style={{ color: '#94A3B8' }}>{pack.price}</span>
-                        {creditLoading === pack.priceId && <span className="text-xs">...</span>}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {plan === 'free' && (
                 <>
                   <div className="rounded-xl p-5 mb-4" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.12), rgba(6,182,212,0.08))', border: '1px solid rgba(139,92,246,0.3)' }}>
@@ -239,9 +183,7 @@ export function SettingsClient({ name, email, location, plan, locale, creditsBal
               )}
 
               <p className="text-xs mt-4" style={{ color: '#64748B' }}>
-                {locale === 'in'
-                  ? 'Billing managed securely via Paddle. Cancel anytime. No hidden fees.'
-                  : 'Billing managed securely via Stripe. Cancel anytime. No hidden fees.'}
+                Billing managed securely via Stripe. Cancel anytime. No hidden fees.
               </p>
             </GlassCard>
           </TabsContent>

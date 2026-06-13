@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
 import { createServerClient } from '@/lib/supabase'
 import { getStripe, getPriceId } from '@/lib/stripe'
-import { getPaddle, getPaddlePriceId, PADDLE_CREDIT_PACKS } from '@/lib/paddle'
 
 const logger = console
 
@@ -11,51 +10,21 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await req.json() as { plan?: string; interval?: string; creditPackPriceId?: string }
+  const body = await req.json() as { plan?: string; interval?: string }
   const plan = body.plan ?? 'pro'
   const interval = body.interval ?? 'month'
-  const creditPackPriceId = body.creditPackPriceId
 
   const { data: profile } = await supabase
     .from('users')
-    .select('locale, stripe_customer_id, paddle_customer_id, name')
+    .select('locale, stripe_customer_id, name')
     .eq('id', user.id)
     .single()
 
-  if (profile?.locale === 'in') {
-    let priceId: string
-
-    if (creditPackPriceId) {
-      const pack = PADDLE_CREDIT_PACKS.find(p => p.priceId === creditPackPriceId && p.priceId !== '')
-      if (!pack) return NextResponse.json({ error: 'Invalid credit pack' }, { status: 400 })
-      priceId = pack.priceId
-    } else {
-      try {
-        priceId = getPaddlePriceId(plan, interval)
-      } catch {
-        return NextResponse.json({ error: 'Invalid plan or price not configured' }, { status: 400 })
-      }
-    }
-
-    try {
-      const paddle = getPaddle()
-      const transaction = await paddle.transactions.create({
-        items: [{ priceId, quantity: 1 }],
-        customData: { supabase_user_id: user.id },
-        ...(profile?.paddle_customer_id ? { customerId: profile.paddle_customer_id } : {}),
-      })
-      return NextResponse.json({ provider: 'paddle', transactionId: transaction.id })
-    } catch (err) {
-      Sentry.setUser({ id: user.id })
-      Sentry.captureException(err)
-      logger.error('[billing/checkout] Paddle error:', err)
-      return NextResponse.json({ error: 'Failed to create Paddle transaction' }, { status: 500 })
-    }
-  }
+  const currency = profile?.locale === 'in' ? 'inr' : 'gbp'
 
   let priceId: string
   try {
-    priceId = getPriceId(plan, interval, 'gbp')
+    priceId = getPriceId(plan, interval, currency)
   } catch {
     return NextResponse.json({ error: 'Invalid plan or price not configured' }, { status: 400 })
   }
@@ -84,7 +53,7 @@ export async function POST(req: NextRequest) {
       cancel_url: `${origin}/settings?tab=plan`,
       allow_promotion_codes: true,
     })
-    return NextResponse.json({ provider: 'stripe', url: session.url })
+    return NextResponse.json({ url: session.url })
   } catch (err) {
     Sentry.setUser({ id: user.id })
     Sentry.captureException(err)

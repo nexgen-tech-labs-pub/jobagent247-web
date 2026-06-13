@@ -13,10 +13,10 @@ export async function POST(request: NextRequest) {
   }
 
   const { plan, locale } = await getUserBillingContext(supabase, user.id)
-  const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'cv_improve', locale)
+  const { allowed, remaining, code, lockedUntil } = await checkQuota(supabase, user.id, plan, 'cv_improve', locale)
   if (!allowed) {
     return new Response(
-      JSON.stringify({ error: 'Free plan allows 1 CV rewrite. Upgrade for unlimited.', remaining: 0 }),
+      JSON.stringify({ error: 'Free plan allows 1 CV rewrite. Upgrade for unlimited.', remaining: 0, code, lockedUntil }),
       { status: 429, headers: { 'Content-Type': 'application/json' } }
     )
   }

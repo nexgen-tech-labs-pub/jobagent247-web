@@ -21,10 +21,10 @@ export async function POST(request: NextRequest) {
   }
 
   const { plan, locale } = await getUserBillingContext(supabase, user.id)
-  const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'cv_analyse', locale)
+  const { allowed, remaining, code, lockedUntil } = await checkQuota(supabase, user.id, plan, 'cv_analyse', locale)
   if (!allowed) {
     return NextResponse.json(
-      { error: 'Free plan allows 1 CV analysis. Upgrade for more.', remaining: 0 },
+      { error: 'Free plan allows 1 CV analysis. Upgrade for more.', remaining: 0, code, lockedUntil },
       { status: 429 }
     )
   }

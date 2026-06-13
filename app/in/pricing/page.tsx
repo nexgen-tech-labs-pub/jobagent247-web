@@ -153,7 +153,7 @@ export default function IndiaPricingPage() {
           </div>
 
           <div className="text-center mt-12">
-            <p className="text-sm mb-6" style={{ color: '#64748B' }}>No credit card required to start · Cancel anytime · Paddle-secured checkout</p>
+            <p className="text-sm mb-6" style={{ color: '#64748B' }}>No credit card required to start · Cancel anytime · Stripe-secured checkout</p>
             <GradientButton href="/dashboard" size="lg">Start free today</GradientButton>
           </div>
       </div>

@@ -15,6 +15,8 @@ import {
   Target,
   BrainCircuit,
   TrendingUp,
+  BookOpen,
+  Inbox,
   LogOut,
 } from 'lucide-react'
 import { getBrowserClient } from '@/lib/supabase-browser'
@@ -27,7 +29,9 @@ const navItems = [
   { label: 'Job Fit', href: '/job-fit', icon: Target },
   { label: 'Career Intel', href: '/career-intelligence', icon: BrainCircuit },
   { label: 'Growth Coach', href: '/career-growth', icon: TrendingUp },
+  { label: 'Evidence Builder', href: '/evidence-builder', icon: BookOpen },
   { label: 'Applications', href: '/applications', icon: CheckSquare },
+  { label: 'Follow-Ups', href: '/follow-ups', icon: Inbox },
   { label: 'Interview Prep', href: '/interview-prep', icon: MessageSquare },
   { label: 'Settings', href: '/settings', icon: Settings },
 ]

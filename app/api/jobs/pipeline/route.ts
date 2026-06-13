@@ -11,6 +11,27 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const { data: userData } = await supabase
+    .from('users')
+    .select('plan')
+    .eq('id', user.id)
+    .single()
+
+  const plan = (userData?.plan ?? 'free') as string
+
+  if (plan === 'free') {
+    const { count } = await supabase
+      .from('user_jobs')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+    if ((count ?? 0) >= 5) {
+      return NextResponse.json(
+        { error: 'Free plan is limited to 5 tracked jobs. Upgrade to Pro for unlimited tracking.', code: 'PLAN_LIMIT' },
+        { status: 403 },
+      )
+    }
+  }
+
   const body = await req.json() as {
     jobId: string
     matchScore: number

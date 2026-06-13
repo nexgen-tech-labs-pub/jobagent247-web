@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const { plan, locale } = await getUserBillingContext(supabase, user.id)
-    const { allowed } = await checkQuota(supabase, user.id, plan, 'match_bulk', locale)
+    const { allowed, code, lockedUntil } = await checkQuota(supabase, user.id, plan, 'match_bulk', locale)
     if (!allowed) {
-      return NextResponse.json({ error: 'Free plan allows 2 bulk match requests. Upgrade for more.', remaining: 0 }, { status: 429 })
+      return NextResponse.json({ error: 'Free plan allows 2 bulk match requests. Upgrade for more.', remaining: 0, code, lockedUntil }, { status: 429 })
     }
 
     const { data: cv } = await supabase

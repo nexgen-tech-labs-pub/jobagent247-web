@@ -13,10 +13,10 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { plan, locale } = await getUserBillingContext(supabase, user.id)
-  const { allowed } = await checkQuota(supabase, user.id, plan, 'cv_upload', locale)
+  const { allowed, code, lockedUntil } = await checkQuota(supabase, user.id, plan, 'cv_upload', locale)
   if (!allowed) {
     return NextResponse.json(
-      { error: 'Free plan allows 1 CV upload. Upgrade to upload more.' },
+      { error: 'Free plan allows 1 CV upload. Upgrade to upload more.', code, lockedUntil },
       { status: 429 },
     )
   }

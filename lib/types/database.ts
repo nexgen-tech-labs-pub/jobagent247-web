@@ -395,6 +395,224 @@ export interface ApplicationInsights {
   summary: string
 }
 
+// ─── Evidence Builder ──────────────────────────────────────────────────────────
+
+export type EvidenceAssetType =
+  | 'portfolio_project'
+  | 'star_story'
+  | 'cv_bullets'
+  | 'linkedin_bullets'
+  | 'interview_pack'
+  | 'full_bundle'
+
+export interface EvidenceGap {
+  skillOrTheme: string
+  gapType: 'critical' | 'important' | 'nice_to_have'
+  description: string
+  currentEvidenceSummary: string
+  recommendedEvidenceStrategy: string
+}
+
+export interface EvidencePortfolioProject {
+  projectTitle: string
+  targetSkillGapsAddressed: string[]
+  targetRoleRelevance: string
+  problemStatement: string
+  businessScenario: string
+  technicalScope: string
+  tools: string[]
+  architectureOverview: string
+  implementationSteps: string[]
+  deliverables: string[]
+  estimatedEffort: string
+  difficultyLevel: 'beginner' | 'intermediate' | 'advanced'
+  readmeOutline: string[]
+  cvBullets: string[]
+  interviewTalkingPoints: string[]
+}
+
+export interface EvidenceStarStory {
+  title: string
+  situation: string
+  task: string
+  action: string
+  result: string
+  metrics: string
+  skillsDemonstrated: string[]
+  applicableInterviewQuestions: string[]
+  confidenceLevel: 'high' | 'medium' | 'low'
+  missingDetails: string[]
+}
+
+export interface EvidenceInterviewPack {
+  sixtySecondPitch: string
+  threeMinuteExplanation: string
+  technicalDeepDivePoints: string[]
+  businessImpactPoints: string[]
+  tradeOffDiscussionPoints: string[]
+  commonFollowUpQuestions: string[]
+}
+
+export interface EvidenceBundle {
+  evidenceGapSummary: string
+  detectedEvidenceGaps: EvidenceGap[]
+  portfolioProjects: EvidencePortfolioProject[]
+  starStories: EvidenceStarStory[]
+  cvBullets: string[]
+  linkedinBullets: string[]
+  interviewEvidencePack: EvidenceInterviewPack
+  completionChecklist: string[]
+}
+
+export interface SavedEvidenceAsset {
+  id: string
+  user_id: string
+  asset_type: EvidenceAssetType
+  title: string
+  target_role: string
+  skill_or_gap: string | null
+  content: EvidenceBundle
+  created_at: string
+}
+
+// ─── Email Follow-Ups ──────────────────────────────────────────────────────────
+
+export type EmailProvider = 'gmail' | 'microsoft'
+
+export type EmailConnectionStatus =
+  | 'pending'
+  | 'active'
+  | 'paused'
+  | 'reconnect_required'
+  | 'failed'
+  | 'disconnected'
+
+export type EmailClassification =
+  | 'application_acknowledgement'
+  | 'recruiter_outreach'
+  | 'request_for_information'
+  | 'interview_invitation'
+  | 'interview_scheduling'
+  | 'interview_confirmation'
+  | 'interview_feedback'
+  | 'rejection'
+  | 'offer'
+  | 'background_check'
+  | 'follow_up_response'
+  | 'job_alert'
+  | 'unrelated'
+
+export type FollowUpUrgency = 'urgent' | 'high' | 'normal' | 'low'
+export type FollowUpStatus = 'pending' | 'draft_ready' | 'snoozed' | 'dismissed' | 'sent' | 'no_longer_needed'
+export type FollowUpDraftSendStatus = 'not_sent' | 'copied' | 'sent'
+
+export interface ConnectedEmailAccount {
+  id: string
+  user_id: string
+  provider: EmailProvider
+  email_address: string
+  provider_account_id: string
+  required_container_name: string
+  connection_status: EmailConnectionStatus
+  last_sync_attempt_at: string | null
+  last_successful_sync_at: string | null
+  next_scheduled_sync_at: string | null
+  sync_cursor: string | null
+  initial_sync_completed: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface SyncedEmailMessage {
+  id: string
+  user_id: string
+  connected_email_account_id: string
+  provider_message_id: string
+  provider_thread_id: string
+  sender: string
+  subject: string
+  received_at: string
+  body_text: string
+  snippet: string
+  classification: EmailClassification | null
+  classification_confidence: 'high' | 'medium' | 'low' | null
+  action_required: boolean
+  linked_application_id: string | null
+  created_at: string
+}
+
+export interface FollowUpRecommendation {
+  id: string
+  user_id: string
+  application_id: string | null
+  connected_email_account_id: string
+  provider_thread_id: string
+  source_message_id: string
+  recommendation_type: string
+  reason: string
+  urgency: FollowUpUrgency
+  confidence: 'high' | 'medium' | 'low'
+  recommended_send_at: string | null
+  status: FollowUpStatus
+  created_at: string
+  updated_at: string
+}
+
+export interface FollowUpDraft {
+  id: string
+  user_id: string
+  follow_up_recommendation_id: string
+  subject: string
+  body: string
+  placeholders: string[]
+  generation_context: string
+  version: number
+  edited_by_user: boolean
+  send_status: FollowUpDraftSendStatus
+  created_at: string
+  updated_at: string
+}
+
+export interface EmailSyncRun {
+  id: string
+  user_id: string
+  connected_email_account_id: string | null
+  trigger_type: 'scheduled' | 'manual' | 'initial'
+  status: 'queued' | 'running' | 'completed' | 'partial' | 'failed'
+  started_at: string
+  completed_at: string | null
+  messages_scanned: number
+  messages_created: number
+  recommendations_created: number
+  error_summary: string | null
+  created_at: string
+}
+
+// AI output shapes
+export interface EmailClassificationResult {
+  classification: EmailClassification
+  confidence: 'high' | 'medium' | 'low'
+  isJobRelated: boolean
+  actionRequired: boolean
+  suggestedCompany: string | null
+  suggestedJobTitle: string | null
+  applicationMatchConfidence: 'high' | 'medium' | 'low' | null
+  followUpRecommended: boolean
+  followUpType: string | null
+  followUpUrgency: FollowUpUrgency | null
+  followUpReason: string | null
+}
+
+export interface FollowUpDraftResult {
+  subject: string
+  body: string
+  draftType: string
+  placeholders: string[]
+  warnings: string[]
+  confidence: 'high' | 'medium' | 'low'
+  rationale: string
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -412,6 +630,36 @@ export interface Database {
       readiness_analyses: TableDef<ReadinessAnalysis, Omit<ReadinessAnalysis, 'id' | 'created_at'>, Partial<Omit<ReadinessAnalysis, 'id'>>>
       interview_kits: TableDef<InterviewKit, Omit<InterviewKit, 'id' | 'created_at'>, Partial<Omit<InterviewKit, 'id'>>>
       mock_interview_sessions: TableDef<MockInterviewSession, Omit<MockInterviewSession, 'id' | 'created_at' | 'completed_at'>, Partial<Omit<MockInterviewSession, 'id'>>>
+      evidence_assets: TableDef<
+        SavedEvidenceAsset,
+        Omit<SavedEvidenceAsset, 'id' | 'created_at'>,
+        Partial<Omit<SavedEvidenceAsset, 'id'>>
+      >
+      connected_email_accounts: TableDef<
+        ConnectedEmailAccount,
+        Omit<ConnectedEmailAccount, 'id' | 'created_at' | 'updated_at'>,
+        Partial<Omit<ConnectedEmailAccount, 'id'>>
+      >
+      synced_email_messages: TableDef<
+        SyncedEmailMessage,
+        Omit<SyncedEmailMessage, 'id' | 'created_at'>,
+        Partial<Omit<SyncedEmailMessage, 'id'>>
+      >
+      follow_up_recommendations: TableDef<
+        FollowUpRecommendation,
+        Omit<FollowUpRecommendation, 'id' | 'created_at' | 'updated_at'>,
+        Partial<Omit<FollowUpRecommendation, 'id'>>
+      >
+      follow_up_drafts: TableDef<
+        FollowUpDraft,
+        Omit<FollowUpDraft, 'id' | 'created_at' | 'updated_at'>,
+        Partial<Omit<FollowUpDraft, 'id'>>
+      >
+      email_sync_runs: TableDef<
+        EmailSyncRun,
+        Omit<EmailSyncRun, 'id' | 'created_at'>,
+        never
+      >
     }
     Views: Record<string, never>
     Functions: Record<string, never>

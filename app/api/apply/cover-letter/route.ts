@@ -24,9 +24,9 @@ export async function POST(request: NextRequest) {
   }
 
   const { plan, locale } = await getUserBillingContext(supabase, user.id)
-  const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'cover_letter', locale)
+  const { allowed, remaining, code, lockedUntil } = await checkQuota(supabase, user.id, plan, 'cover_letter', locale)
   if (!allowed) {
-    return NextResponse.json({ error: 'Free plan allows 1 cover letter. Upgrade for more.', remaining: 0 }, { status: 429 })
+    return NextResponse.json({ error: 'Free plan allows 1 cover letter. Upgrade for more.', remaining: 0, code, lockedUntil }, { status: 429 })
   }
 
   const { data: cv } = await supabase

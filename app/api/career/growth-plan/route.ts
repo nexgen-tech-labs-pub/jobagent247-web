@@ -16,9 +16,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const { plan, locale } = await getUserBillingContext(supabase, user.id)
-    const { allowed, remaining } = await checkQuota(supabase, user.id, plan, 'career_growth', locale)
+    const { allowed, remaining, code, lockedUntil } = await checkQuota(supabase, user.id, plan, 'career_growth', locale)
     if (!allowed) {
-      return NextResponse.json({ error: 'Growth plan limit reached. Upgrade for more.', remaining: 0 }, { status: 429 })
+      return NextResponse.json({ error: 'Growth plan limit reached. Upgrade for more.', remaining: 0, code, lockedUntil }, { status: 429 })
     }
 
     const { data: cv } = await supabase
