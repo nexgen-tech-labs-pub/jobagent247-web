@@ -60,7 +60,7 @@ export function HelpChat() {
       <button
         onClick={() => setOpen(o => !o)}
         aria-label="Open JobAgent247 help chat"
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-full shadow-lg transition-all"
+        className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-all"
         style={{
           background: 'linear-gradient(135deg,#8B5CF6,#06B6D4)',
           boxShadow: '0 8px 32px rgba(139,92,246,0.4)',
@@ -69,7 +69,6 @@ export function HelpChat() {
         {open
           ? <X className="w-5 h-5 text-white" />
           : <MessageCircle className="w-5 h-5 text-white" />}
-        {!open && <span className="text-white text-sm font-semibold">Need help?</span>}
       </button>
 
       {/* Panel */}
