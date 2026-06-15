@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { GlassCard } from '@/components/ui/GlassCard'
@@ -52,7 +52,7 @@ function StatusBadge({ status }: { status: ConnectedEmailAccount['connection_sta
   )
 }
 
-export default function AccountsPage() {
+function AccountsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [accounts, setAccounts] = useState<ConnectedEmailAccount[]>([])
@@ -211,5 +211,13 @@ export default function AccountsPage() {
         ))}
       </div>
     </DashboardLayout>
+  )
+}
+
+export default function AccountsPage() {
+  return (
+    <Suspense>
+      <AccountsContent />
+    </Suspense>
   )
 }
