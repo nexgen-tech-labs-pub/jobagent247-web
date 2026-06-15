@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       } : undefined
     )
 
-    const { savedJob, analysis } = await saveJobWithAnalysis(
+    const { savedJob } = await saveJobWithAnalysis(
       supabase,
       user.id,
       {

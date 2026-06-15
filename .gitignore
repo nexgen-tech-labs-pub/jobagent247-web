@@ -49,6 +49,8 @@ scripts/*
 *.env.local
 *.env.api.example
 *.env.web.example
+config/
+.config/
 
 CLAUDE.md
 AGENTS.md

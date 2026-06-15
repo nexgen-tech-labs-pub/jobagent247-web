@@ -142,10 +142,9 @@ export default function FollowUpsPage() {
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [generatingId, setGeneratingId] = useState<string | null>(null)
+  const [, setGeneratingId] = useState<string | null>(null)
 
   const loadFollowUps = () => {
-    setLoading(true)
     fetch('/api/email/follow-ups')
       .then(r => r.json())
       .then((d: { followUps?: FollowUpWithSource[]; error?: string }) => {
@@ -162,6 +161,7 @@ export default function FollowUpsPage() {
     setSyncing(true)
     await fetch('/api/email/sync', { method: 'POST' })
     setSyncing(false)
+    setLoading(true)
     loadFollowUps()
   }
 
