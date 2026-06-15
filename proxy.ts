@@ -40,10 +40,20 @@ export async function proxy(request: NextRequest) {
 
   // Set locale cookie on first visit based on geo
   const existingLocale = request.cookies.get('locale')?.value
-  let detectedLocale: 'uk' | 'in' = 'uk'
+  type Locale = 'uk' | 'us' | 'eu' | 'au' | 'in'
+  const EU_COUNTRIES = new Set([
+    'AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE',
+    'IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE',
+    'NO','IS','LI','CH', // EEA + Switzerland
+  ])
+  let detectedLocale: Locale = 'uk'
   if (!existingLocale) {
-    const country = request.headers.get('x-vercel-ip-country') ?? undefined
-    detectedLocale = country === 'IN' ? 'in' : 'uk'
+    const country = request.headers.get('x-vercel-ip-country') ?? ''
+    if (country === 'GB') detectedLocale = 'uk'
+    else if (country === 'US') detectedLocale = 'us'
+    else if (country === 'AU' || country === 'NZ') detectedLocale = 'au'
+    else if (country === 'IN') detectedLocale = 'in'
+    else if (EU_COUNTRIES.has(country)) detectedLocale = 'eu'
   }
 
   let response = NextResponse.next({ request })
