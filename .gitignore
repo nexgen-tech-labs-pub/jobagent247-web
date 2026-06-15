@@ -54,3 +54,8 @@ config/
 
 CLAUDE.md
 AGENTS.md
+
+# ── Playwright ────────────────────────────────────────────────────────────────
+.playwright/
+playwright-report/
+test-results/
