@@ -14,20 +14,18 @@ const TOTAL = STEPS.length
 type Prefs = {
   name: string
   currentRole: string
-  location: string
   targetRoles: string[]
   jobType: string
   locationPref: string
   visaRequired: boolean
   keywords: string
   priority: string
-  locale: 'uk' | 'in'
+  locale: 'uk' | 'us' | 'eu' | 'au' | 'in'
 }
 
 const DEFAULTS: Prefs = {
   name: '',
   currentRole: '',
-  location: '',
   targetRoles: [],
   jobType: 'Both',
   locationPref: 'Any',
@@ -57,10 +55,12 @@ export default function OnboardingPage() {
         .split('; ')
         .find(row => row.startsWith('locale='))
         ?.split('=')[1]
+      const validLocales = ['uk', 'us', 'eu', 'au', 'in'] as const
+      const detectedLocale = validLocales.find(l => l === localeCookie) ?? 'uk'
       setPrefs(p => ({
         ...p,
         name: (authUser.user_metadata as { full_name?: string })?.full_name ?? '',
-        locale: (localeCookie === 'in' ? 'in' : 'uk') as 'uk' | 'in',
+        locale: detectedLocale,
       }))
     })
   }, [router])
@@ -70,7 +70,7 @@ export default function OnboardingPage() {
 
   const saveStep = useCallback(async () => {
     const body: Record<string, unknown> = {}
-    if (step === 0) Object.assign(body, { name: prefs.name, current_role: prefs.currentRole, location: prefs.location })
+    if (step === 0) Object.assign(body, { name: prefs.name, current_role: prefs.currentRole })
     if (step === 1) Object.assign(body, { locale: prefs.locale })
     if (step === 2) Object.assign(body, { target_roles: prefs.targetRoles, job_type_pref: prefs.jobType, location_pref: prefs.locationPref, visa_required: prefs.visaRequired })
     if (step === 3) Object.assign(body, { keywords: prefs.keywords.split(/\s+/).filter(Boolean) })
@@ -146,9 +146,6 @@ export default function OnboardingPage() {
             <Field label="Current role / job title">
               <Input value={prefs.currentRole} onChange={v => set('currentRole', v)} placeholder="e.g. Senior DevOps Engineer" />
             </Field>
-            <Field label="Location (city, country)">
-              <Input value={prefs.location} onChange={v => set('location', v)} placeholder="e.g. London, UK" />
-            </Field>
           </>
         )}
 
@@ -159,18 +156,24 @@ export default function OnboardingPage() {
             <p className="text-sm" style={{ color: '#64748B' }}>This determines your pricing, job sources, and payment options.</p>
             <Field label="Market">
               <div className="space-y-3 mt-1">
-                {(['uk', 'in'] as const).map(loc => (
+                {([
+                  { value: 'uk', label: '🇬🇧 United Kingdom' },
+                  { value: 'us', label: '🇺🇸 United States' },
+                  { value: 'eu', label: '🇪🇺 Europe' },
+                  { value: 'au', label: '🇦🇺 Australia' },
+                  { value: 'in', label: '🇮🇳 India' },
+                ] as const).map(({ value, label }) => (
                   <button
-                    key={loc}
+                    key={value}
                     type="button"
-                    onClick={() => set('locale', loc)}
+                    onClick={() => set('locale', value)}
                     className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-medium transition-all text-left"
-                    style={prefs.locale === loc
+                    style={prefs.locale === value
                       ? { background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.4)', color: '#8B5CF6' }
                       : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--color-text-secondary)' }}
                   >
-                    <span>{loc === 'uk' ? '🇬🇧 United Kingdom' : '🇮🇳 India'}</span>
-                    {prefs.locale === loc && <Check className="w-4 h-4" />}
+                    <span>{label}</span>
+                    {prefs.locale === value && <Check className="w-4 h-4" />}
                   </button>
                 ))}
               </div>
