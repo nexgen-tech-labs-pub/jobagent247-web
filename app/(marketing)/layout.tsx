@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://jobagent247.com'),
+  metadataBase: new URL('https://jobagent247.co'),
   title: 'JobAgent247 — AI Job Search Tool UK | CV Builder & Interview Prep',
   description: 'UK\'s AI job search platform. Build a stronger CV, match roles on LinkedIn and Indeed, generate tailored cover letters, and prepare for interviews.',
   keywords: [
@@ -18,13 +18,20 @@ export const metadata: Metadata = {
     description: 'Get more interviews with your AI job search agents.',
     type: 'website',
     locale: 'en_GB',
-    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+    url: 'https://jobagent247.co',
+    siteName: 'JobAgent247',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'JobAgent247 — AI Job Search Tool UK',
+    description: 'Get more interviews with your AI job search agents.',
+    site: '@jobagent247',
   },
   alternates: {
-    canonical: 'https://jobagent247.com',
+    canonical: 'https://jobagent247.co',
     languages: {
-      'en-GB': 'https://jobagent247.com',
-      'en-IN': 'https://jobagent247.com/in',
+      'en-GB': 'https://jobagent247.co',
+      'en-IN': 'https://jobagent247.co/in',
     },
   },
 }

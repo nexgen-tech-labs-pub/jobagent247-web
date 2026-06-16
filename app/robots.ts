@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/dashboard', '/api/', '/onboarding', '/profile', '/cv-agent', '/job-matches', '/applications', '/interview-prep', '/settings'],
       },
     ],
-    sitemap: 'https://jobagent247.com/sitemap.xml',
+    sitemap: 'https://jobagent247.co/sitemap.xml',
   }
 }
