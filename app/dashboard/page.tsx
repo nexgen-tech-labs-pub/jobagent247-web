@@ -5,6 +5,7 @@ import { GlassCard } from '@/components/ui/GlassCard'
 import { GradientButton } from '@/components/ui/GradientButton'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { Progress } from '@/components/ui/progress'
+import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase'
 import { FileText, MessageSquare, Bell, ArrowRight } from 'lucide-react'
 

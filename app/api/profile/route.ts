@@ -33,6 +33,8 @@ export async function GET() {
         locale: 'uk',
         usage_counts: {},
         credits_balance: 0,
+        founding_member: false,
+        trial_ends_at: null,
       })
       return NextResponse.json(created)
     }

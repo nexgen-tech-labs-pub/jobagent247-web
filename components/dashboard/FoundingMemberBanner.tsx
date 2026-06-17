@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Star, X } from 'lucide-react'
 
 interface Props {
@@ -9,12 +9,10 @@ interface Props {
 
 export function FoundingMemberBanner({ trialEndsAt }: Props) {
   const [dismissed, setDismissed] = useState(false)
-  const [daysLeft, setDaysLeft] = useState(0)
-
-  useEffect(() => {
+  const [daysLeft] = useState(() => {
     const ms = new Date(trialEndsAt).getTime() - Date.now()
-    setDaysLeft(Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24))))
-  }, [trialEndsAt])
+    return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)))
+  })
 
   if (dismissed || daysLeft <= 0) return null
 
