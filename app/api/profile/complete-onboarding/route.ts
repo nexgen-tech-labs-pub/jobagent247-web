@@ -9,10 +9,12 @@ export async function POST() {
 
   await updateUser(supabase, authUser.id, { onboarding_complete: true })
 
-  // Phase 3: trigger Profile Agent here (Claude API call)
-  // For now return a stub structured profile
+  // Claim a founding spot (first 100 users get 30-day Pro free)
+  const { data: claimed } = await supabase.rpc('claim_founding_spot', { p_user_id: authUser.id })
+
   return NextResponse.json({
     success: true,
+    foundingMember: claimed === true,
     structuredProfile: {
       skills: [],
       experienceYears: 0,

@@ -22,6 +22,8 @@ export interface User {
   locale: 'uk' | 'in'
   usage_counts: Record<string, number>
   credits_balance: number
+  founding_member: boolean
+  trial_ends_at: string | null
   created_at: string
 }
 
