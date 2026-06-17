@@ -7,6 +7,13 @@ import { StatusBadge } from '@/components/ui/StatusBadge'
 import { Progress } from '@/components/ui/progress'
 import { createServerClient } from '@/lib/supabase'
 import { FileText, MessageSquare, Bell, ArrowRight } from 'lucide-react'
+
+const ACTION_HREFS: Record<string, string> = {
+  '1': '/profile',
+  '2': '/profile',
+  '3': '/job-matches',
+  '4': '/follow-ups',
+}
 import type { Job } from '@/lib/types/database'
 
 const actionIcons: Record<string, React.ElementType> = { FileText, MessageSquare, Bell }
@@ -115,17 +122,19 @@ export default async function DashboardPage() {
               {suggestedActions.map(action => {
                 const Icon = actionIcons[action.icon] ?? FileText
                 return (
-                  <GlassCard key={action.id} hover className="p-4 flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                      style={{ background: action.priority === 'high' ? 'rgba(139,92,246,0.15)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(139,92,246,0.2)' }}>
-                      <Icon className="w-4 h-4" style={{ color: '#8B5CF6' }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white">{action.title}</p>
-                      <p className="text-xs mt-0.5" style={{ color: '#64748B' }}>{action.subtitle}</p>
-                    </div>
-                    <ArrowRight className="w-4 h-4 shrink-0" style={{ color: '#64748B' }} />
-                  </GlassCard>
+                  <Link key={action.id} href={ACTION_HREFS[action.id] ?? '/dashboard'}>
+                    <GlassCard hover className="p-4 flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                        style={{ background: action.priority === 'high' ? 'rgba(139,92,246,0.15)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(139,92,246,0.2)' }}>
+                        <Icon className="w-4 h-4" style={{ color: '#8B5CF6' }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white">{action.title}</p>
+                        <p className="text-xs mt-0.5" style={{ color: '#64748B' }}>{action.subtitle}</p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 shrink-0" style={{ color: '#64748B' }} />
+                    </GlassCard>
+                  </Link>
                 )
               })}
             </div>

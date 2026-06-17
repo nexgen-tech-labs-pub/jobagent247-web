@@ -682,7 +682,7 @@ export default function InterviewPrepPage() {
                   <select value={interviewType} onChange={(e) => setInterviewType(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none"
                     style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
-                    {INTERVIEW_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                    {INTERVIEW_TYPES.map((t) => <option key={t} value={t} style={{ backgroundColor: '#1e293b', color: 'white' }}>{t}</option>)}
                   </select>
                 </div>
                 <div>
@@ -690,7 +690,7 @@ export default function InterviewPrepPage() {
                   <select value={geography} onChange={(e) => setGeography(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none"
                     style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
-                    {GEOGRAPHIES.map((g) => <option key={g} value={g}>{g}</option>)}
+                    {GEOGRAPHIES.map((g) => <option key={g} value={g} style={{ backgroundColor: '#1e293b', color: 'white' }}>{g}</option>)}
                   </select>
                 </div>
               </GlassCard>
