@@ -9,10 +9,10 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 const navLinks = [
   { label: 'Product', href: '#features' },
-  { label: 'How it Works', href: '#workflow' },
-  { label: 'Features', href: '#feature-grid' },
   { label: 'Pricing', href: '#pricing' },
-  { label: 'FAQ', href: '#faq' },
+  { label: 'CV Builder', href: '/cv-builder' },
+  { label: 'Learn', href: '/learn' },
+  { label: 'Comparisons', href: '/vs' },
 ]
 
 export function Navbar() {
