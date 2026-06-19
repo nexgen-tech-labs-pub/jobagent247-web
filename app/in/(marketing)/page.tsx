@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import {
   FileText, Briefcase, MessageSquare, CheckSquare, User, Target,
@@ -507,12 +508,13 @@ function Footer() {
     <footer className="border-t py-12" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2 font-heading font-bold text-white">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #8B5CF6, #06B6D4)' }}>
-              <Zap className="w-3.5 h-3.5 text-white" />
-            </div>
-            JobAgent247
-          </div>
+          <Image
+            src="/jobagent-logo.png"
+            alt="JobAgent247"
+            width={123}
+            height={48}
+            className="h-8 w-auto"
+          />
           <div className="flex flex-wrap justify-center gap-6">
             {['Product', 'How it Works', 'Features', 'Pricing', 'FAQ'].map((link) => (
               <a key={link} href={`#${link.toLowerCase().replace(/\s/g, '-')}`} className="text-sm" style={{ color: '#64748B' }}>{link}</a>

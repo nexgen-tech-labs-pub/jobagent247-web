@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Menu, X, Zap } from 'lucide-react'
+import Image from 'next/image'
+import { Menu, X } from 'lucide-react'
 import { GradientButton } from '@/components/ui/GradientButton'
 import { SecondaryButton } from '@/components/ui/SecondaryButton'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
@@ -25,14 +26,15 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2 font-heading font-bold text-[color:var(--foreground)] text-lg">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #8B5CF6, #06B6D4)' }}
-            >
-              <Zap className="w-4 h-4 text-white" />
-            </div>
-            JobAgent247
+          <Link href="/" className="inline-flex items-center" aria-label="JobAgent247 home">
+            <Image
+              src="/jobagent-logo.png"
+              alt="JobAgent247"
+              width={154}
+              height={60}
+              priority
+              className="h-10 w-auto"
+            />
           </Link>
 
           <div className="hidden md:flex items-center gap-6">
