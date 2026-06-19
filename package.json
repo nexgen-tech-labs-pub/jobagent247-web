@@ -12,7 +12,10 @@
     "type-check": "tsc --noEmit",
     "check:env": "node scripts/check-env.mjs",
     "check:env:ci": "node scripts/check-env.mjs --ci",
-    "check": "node scripts/check-env.mjs && tsc --noEmit && eslint"
+    "check": "node scripts/check-env.mjs && tsc --noEmit && eslint",
+    "test:e2e": "playwright install --with-deps chromium && playwright test --project=e2e",
+    "test:e2e:ui": "playwright install chromium && playwright test --project=e2e --ui",
+    "test:smoke": "playwright install chromium && playwright test --project=smoke"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",
