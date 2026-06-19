@@ -37,14 +37,6 @@ export const metadata: Metadata = {
       "Get more interviews with your personal AI job-search agents.",
     type: "website",
   },
-  icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-    shortcut: "/icon.svg",
-    apple: "/icon.svg",
-  },
 };
 
 export default function RootLayout({
@@ -67,7 +59,7 @@ export default function RootLayout({
             name: 'JobAgent247',
             alternateName: 'Job Agent 247',
             url: 'https://jobagent247.co',
-            logo: 'https://jobagent247.co/jobagent247-mark.svg',
+            logo: 'https://jobagent247.co/jobagent-logo.png',
             description:
               'AI-powered job-search platform. Ten specialised agents score and rewrite CVs against any job description, find matching live jobs from 50+ UK and Indian job sites, draft tailored cover letters, and prepare you for interviews.',
             sameAs: ['https://jobagent247.co/in'],
