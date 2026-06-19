@@ -4,7 +4,7 @@ import { createServerClient } from '@/lib/supabase'
 import type { JobSourceAdapter, JobSearchRequest, JobSearchRun, PollResult } from './types'
 
 const UK_SITES = ['jobserve.com', 'adzuna.co.uk', 'cv-library.co.uk', 'cwjobs.co.uk', 'reed.co.uk', 'uk.indeed.com']
-const INDIA_SITES = ['naukri.com', 'shine.com', 'timesjobs.com', 'foundit.in']
+const INDIA_SITES = ['naukri.com', 'foundit.in', 'jooble.org', 'shine.com', 'timesjobs.com']
 
 async function pollCloudRunJob(runId: string): Promise<PollResult> {
   const scrapeJobId = runId.replace(/^cloudrun::/, '')
