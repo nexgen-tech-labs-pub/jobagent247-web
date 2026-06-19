@@ -12,9 +12,10 @@ interface Props {
   label: string
   highlight?: boolean
   locale?: 'uk' | 'in'
+  promoCode?: string
 }
 
-export function PlanCta({ plan, interval, label, highlight, locale = 'uk' }: Props) {
+export function PlanCta({ plan, interval, label, highlight, locale = 'uk', promoCode }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const Button = highlight ? GradientButton : SecondaryButton
@@ -32,14 +33,15 @@ export function PlanCta({ plan, interval, label, highlight, locale = 'uk' }: Pro
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
-        router.push(`${signupHref}?plan=${plan}&interval=${interval}`)
+        const promoQs = promoCode ? `&promo=${encodeURIComponent(promoCode)}` : ''
+        router.push(`${signupHref}?plan=${plan}&interval=${interval}${promoQs}`)
         return
       }
 
       const res = await fetch('/api/billing/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan, interval }),
+        body: JSON.stringify({ plan, interval, promoCode: promoCode || undefined }),
       })
       const data = await res.json() as { url?: string; error?: string }
       if (!res.ok || data.error) throw new Error(data.error ?? 'Checkout failed')

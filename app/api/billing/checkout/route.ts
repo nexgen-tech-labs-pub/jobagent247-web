@@ -28,9 +28,10 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await req.json() as { plan?: string; interval?: string; currency?: string }
+  const body = await req.json() as { plan?: string; interval?: string; currency?: string; promoCode?: string }
   const plan = body.plan ?? 'pro'
   const interval = body.interval ?? 'month'
+  const promoCodeRaw = (body.promoCode ?? '').trim().toUpperCase()
 
   const { data: profile } = await supabase
     .from('users')
@@ -62,15 +63,43 @@ export async function POST(req: NextRequest) {
 
   const origin = req.headers.get('origin') ?? process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
+  let resolvedPromotionCodeId: string | undefined
+  if (promoCodeRaw) {
+    try {
+      const list = await stripe.promotionCodes.list({
+        code: promoCodeRaw,
+        active: true,
+        limit: 1,
+      })
+      if (list.data.length === 0) {
+        return NextResponse.json({ error: 'Invalid or expired promo code' }, { status: 400 })
+      }
+      resolvedPromotionCodeId = list.data[0].id
+    } catch (promoErr) {
+      Sentry.captureException(promoErr)
+      logger.error('[billing/checkout] promo code lookup failed:', promoErr)
+      return NextResponse.json({ error: 'Could not verify promo code' }, { status: 500 })
+    }
+  }
+
   try {
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams: Parameters<typeof stripe.checkout.sessions.create>[0] = {
       customer: customerId,
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${origin}/settings?tab=plan&upgraded=1`,
       cancel_url: `${origin}/settings?tab=plan`,
-      allow_promotion_codes: true,
-    })
+    }
+
+    if (resolvedPromotionCodeId) {
+      // When we pre-apply a code, Stripe disallows allow_promotion_codes — the
+      // user can't also type a second one. Cleanly one-or-the-other.
+      sessionParams.discounts = [{ promotion_code: resolvedPromotionCodeId }]
+    } else {
+      sessionParams.allow_promotion_codes = true
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams)
     return NextResponse.json({ url: session.url })
   } catch (err) {
     Sentry.setUser({ id: user.id })
