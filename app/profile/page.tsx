@@ -64,17 +64,22 @@ export default function ProfilePage() {
     setSaving(false)
   }
 
-  const addTag = (field: 'target_roles', input: string, setInput: (v: string) => void) => {
+  const addTag = (field: 'target_roles' | 'keywords', input: string, setInput: (v: string) => void) => {
     const tag = input.trim()
     if (!tag) return
     const current = profile?.[field] ?? []
-    if (!current.includes(tag)) save({ [field]: [...current, tag] })
+    if (!current.includes(tag)) {
+      setProfile(p => p ? { ...p, [field]: [...current, tag] } : p)
+      save({ [field]: [...current, tag] })
+    }
     setInput('')
   }
 
-  const removeTag = (field: 'target_roles', tag: string) => {
+  const removeTag = (field: 'target_roles' | 'keywords', tag: string) => {
     const current = profile?.[field] ?? []
-    save({ [field]: current.filter(t => t !== tag) })
+    const next = current.filter(t => t !== tag)
+    setProfile(p => p ? { ...p, [field]: next } : p)
+    save({ [field]: next })
   }
 
   if (loading) {
@@ -225,21 +230,46 @@ export default function ProfilePage() {
         {/* Keywords */}
         <GlassCard className="p-6">
           <h3 className="font-heading font-semibold text-white mb-4">Search Keywords</h3>
-          <p className="text-sm mb-3" style={{ color: '#94A3B8' }}>Space-separated skills and tools used for job matching.</p>
-          <textarea
-            defaultValue={(profile.keywords ?? []).join(' ')}
-            onBlur={e => save({ keywords: e.target.value.split(/\s+/).filter(Boolean) })}
-            placeholder="e.g. AWS Terraform Kubernetes Python DevOps CI/CD"
-            rows={3}
-            className="w-full px-4 py-3 rounded-xl text-sm text-white outline-none resize-none"
+          <p className="text-sm mb-3" style={{ color: '#94A3B8' }}>Press Enter or Space to add a skill. Used for job matching.</p>
+          <input
+            type="text"
+            value={tagInput}
+            onChange={e => {
+              const v = e.target.value
+              if (v.endsWith(' ') || v.endsWith(',')) {
+                addTag('keywords', v.slice(0, -1), setTagInput)
+              } else {
+                setTagInput(v)
+              }
+            }}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault()
+                addTag('keywords', tagInput, setTagInput)
+              } else if (e.key === 'Backspace' && tagInput === '' && (profile.keywords?.length ?? 0) > 0) {
+                e.preventDefault()
+                const last = (profile.keywords ?? [])[profile.keywords!.length - 1]
+                removeTag('keywords', last)
+              }
+            }}
+            placeholder="e.g. AWS, Terraform, Kubernetes"
+            className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none"
             style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}
           />
           {(profile.keywords?.length ?? 0) > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">
               {(profile.keywords ?? []).map(k => (
-                <span key={k} className="text-xs px-2.5 py-1 rounded-full"
+                <span key={k} className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full"
                   style={{ background: 'rgba(6,182,212,0.12)', color: '#06B6D4', border: '1px solid rgba(6,182,212,0.2)' }}>
                   {k}
+                  <button
+                    type="button"
+                    onClick={() => removeTag('keywords', k)}
+                    className="hover:opacity-70"
+                    aria-label={`Remove ${k}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </span>
               ))}
             </div>

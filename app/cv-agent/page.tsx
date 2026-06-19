@@ -132,7 +132,7 @@ function CVAgentInner() {
       })
 
       if (res.status === 429) {
-        setError('Daily limit reached. Upgrade your plan for more applications.')
+        setError('Free plan limit reached for this feature. Upgrade to Pro for more.')
         return
       }
       if (!res.ok) {
@@ -178,7 +178,7 @@ function CVAgentInner() {
         return
       }
       if (res.status === 429) {
-        setError('Daily limit reached.')
+        setError('Plan limit reached for this feature. Upgrade for more.')
         return
       }
       if (!res.ok || !res.body) {
@@ -245,7 +245,7 @@ function CVAgentInner() {
     })
 
     if (res.status === 429) {
-      setError('Daily limit reached. Upgrade your plan for more.')
+      setError('Plan limit reached for this feature. Upgrade for more.')
       setGeneratingCL(false)
       return
     }
@@ -301,12 +301,17 @@ function CVAgentInner() {
     setGeneratingRM(false)
   }
 
+  const selectedCv = cvList.find((c) => c.id === selectedCvId) ?? null
+  const storedScore = selectedCv?.ats_score ?? null
+  const displayScore = result?.score ?? storedScore
   const scoreColor =
-    result && result.score >= 90
+    displayScore != null && displayScore >= 90
       ? '#22C55E'
-      : result && result.score >= 70
+      : displayScore != null && displayScore >= 70
       ? '#F59E0B'
-      : '#EF4444'
+      : displayScore != null
+      ? '#EF4444'
+      : 'rgba(139,92,246,0.3)'
 
   return (
     <DashboardLayout title="CV Agent">
@@ -450,16 +455,16 @@ function CVAgentInner() {
                   <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2.5" />
                   <circle
                     cx="18" cy="18" r="15.9" fill="none"
-                    stroke={result ? scoreColor : 'rgba(139,92,246,0.3)'}
+                    stroke={scoreColor}
                     strokeWidth="2.5"
-                    strokeDasharray={`${result ? result.score : 0} 100`}
+                    strokeDasharray={`${displayScore ?? 0} 100`}
                     strokeLinecap="round"
                     style={{ transition: 'stroke-dasharray 1s ease' }}
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="font-heading font-bold text-2xl" style={{ color: result ? scoreColor : '#64748B' }}>
-                    {result ? result.score : '--'}
+                  <span className="font-heading font-bold text-2xl" style={{ color: displayScore != null ? scoreColor : '#64748B' }}>
+                    {displayScore ?? '--'}
                   </span>
                   <span className="text-xs" style={{ color: '#64748B' }}>/ 100</span>
                 </div>
@@ -468,10 +473,14 @@ function CVAgentInner() {
                 <p className="text-sm font-medium text-white mb-1">
                   {result
                     ? result.score >= 90 ? 'Strong match' : result.score >= 70 ? 'Good match' : 'Needs improvement'
-                    : 'Run agent to score'}
+                    : storedScore != null ? 'Last known score' : 'Run agent to score'}
                 </p>
                 <p className="text-xs" style={{ color: '#94A3B8' }}>
-                  {result ? result.summary : 'Paste a job description and click Run CV Agent'}
+                  {result
+                    ? result.summary
+                    : storedScore != null
+                    ? 'Paste a job description and click Run CV Agent for a fresh score against this role.'
+                    : 'Paste a job description and click Run CV Agent'}
                 </p>
                 {result && (
                   <p className="text-xs mt-1" style={{ color: '#64748B' }}>

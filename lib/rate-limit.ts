@@ -32,16 +32,16 @@ export interface QuotaResult {
 
 const FREE_LIMITS: Record<QuotaFeature, number> = {
   cv_upload:         1,
-  cv_analyse:        1,
+  cv_analyse:        3,
   cv_improve:        1,
-  job_match:         2,
+  job_match:         3,
   match_bulk:        0,   // Pro+
-  cover_letter:      1,
-  recruiter_message: 1,
-  interview_prep:    1,
+  cover_letter:      2,
+  recruiter_message: 2,
+  interview_prep:    2,
   interview_kit:     1,
   career_readiness:  2,
-  job_fit:           2,
+  job_fit:           3,
   career_growth:     0,   // Pro+
   app_insights:      0,   // Pro+
   evidence_build:    0,   // Pro+
