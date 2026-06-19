@@ -3,7 +3,7 @@ import { triggerScrapingJob } from '@/lib/scraper'
 import { createServerClient } from '@/lib/supabase'
 import type { JobSourceAdapter, JobSearchRequest, JobSearchRun, PollResult } from './types'
 
-const UK_SITES = ['reed.co.uk', 'adzuna.co.uk', 'cwjobs.co.uk', 'jobserve.com', 'cv-library.co.uk']
+const UK_SITES = ['jobserve.com', 'adzuna.co.uk', 'cv-library.co.uk', 'cwjobs.co.uk', 'reed.co.uk', 'uk.indeed.com']
 const INDIA_SITES = ['naukri.com', 'shine.com', 'timesjobs.com', 'foundit.in']
 
 async function pollCloudRunJob(runId: string): Promise<PollResult> {
