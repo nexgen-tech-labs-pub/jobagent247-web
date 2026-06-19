@@ -41,16 +41,28 @@ export default async function LearnTopicPage({ params }: Props) {
 
   const schemaJson = JSON.stringify({
     '@context': 'https://schema.org',
-    '@type': ['Article', 'FAQPage'],
-    headline: topic.title,
-    description: topic.metaDescription,
-    author: { '@type': 'Organization', name: 'JobAgent247' },
-    publisher: { '@type': 'Organization', name: 'JobAgent247', url: 'https://jobagent247.co' },
-    mainEntity: topic.faqs.map(faq => ({
-      '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: { '@type': 'Answer', text: faq.answer },
-    })),
+    '@graph': [
+      {
+        '@type': ['Article', 'FAQPage'],
+        headline: topic.title,
+        description: topic.metaDescription,
+        author: { '@type': 'Organization', name: 'JobAgent247' },
+        publisher: { '@type': 'Organization', name: 'JobAgent247', url: 'https://jobagent247.co' },
+        mainEntity: topic.faqs.map(faq => ({
+          '@type': 'Question',
+          name: faq.question,
+          acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://jobagent247.co' },
+          { '@type': 'ListItem', position: 2, name: 'Learn', item: 'https://jobagent247.co/learn' },
+          { '@type': 'ListItem', position: 3, name: topic.title, item: `https://jobagent247.co/learn/${topic.slug}` },
+        ],
+      },
+    ],
   })
 
   const related = LEARN_TOPICS.filter(t => topic.relatedTopics.includes(t.slug))

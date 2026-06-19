@@ -11,7 +11,6 @@ import {
   CheckSquare,
   MessageSquare,
   Settings,
-  Zap,
   Target,
   BrainCircuit,
   TrendingUp,
@@ -20,6 +19,7 @@ import {
   LogOut,
 } from 'lucide-react'
 import { getBrowserClient } from '@/lib/supabase-browser'
+import { Logo } from '@/components/brand/Logo'
 
 const navItems = [
   { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
@@ -68,12 +68,8 @@ export function Sidebar() {
     <aside className="hidden lg:flex flex-col w-60 shrink-0 h-screen sticky top-0 sidebar-surface">
       {/* Logo */}
       <div className="p-5 border-b sidebar-footer-border">
-        <Link href="/dashboard" className="flex items-center gap-2 font-heading font-bold text-white">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #8B5CF6, #06B6D4)' }}>
-            <Zap className="w-4 h-4 text-white" />
-          </div>
-          JobAgent247
+        <Link href="/dashboard" className="inline-flex items-center" aria-label="JobAgent247 dashboard">
+          <Logo size="md" />
         </Link>
       </div>
 

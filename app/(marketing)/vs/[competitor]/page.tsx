@@ -58,17 +58,29 @@ export default async function CompetitorPage({ params }: Props) {
 
   const schemaJson = JSON.stringify({
     '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: [
+    '@graph': [
       {
-        '@type': 'Question',
-        name: `Is JobAgent247 better than ${c.name}?`,
-        acceptedAnswer: { '@type': 'Answer', text: c.verdict },
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: `Is JobAgent247 better than ${c.name}?`,
+            acceptedAnswer: { '@type': 'Answer', text: c.verdict },
+          },
+          {
+            '@type': 'Question',
+            name: `Who should use ${c.name}?`,
+            acceptedAnswer: { '@type': 'Answer', text: c.bestFor },
+          },
+        ],
       },
       {
-        '@type': 'Question',
-        name: `Who should use ${c.name}?`,
-        acceptedAnswer: { '@type': 'Answer', text: c.bestFor },
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://jobagent247.co' },
+          { '@type': 'ListItem', position: 2, name: 'Comparisons', item: 'https://jobagent247.co/vs' },
+          { '@type': 'ListItem', position: 3, name: `JobAgent247 vs ${c.name}`, item: `https://jobagent247.co/vs/${c.slug}` },
+        ],
       },
     ],
   })

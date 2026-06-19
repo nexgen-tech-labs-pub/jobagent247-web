@@ -49,13 +49,25 @@ export default async function RoleCvPage({ params }: Props) {
 
   const schemaJson = JSON.stringify({
     '@context': 'https://schema.org',
-    '@type': 'HowTo',
-    name: `How to Write a ${role.title} CV for UK Jobs`,
-    description: `Step-by-step guide to writing an ATS-optimised ${role.title} CV with the right keywords and structure for UK job applications.`,
-    step: [
-      { '@type': 'HowToStep', name: 'Use the right ATS keywords', text: `Include these keywords in your ${role.title} CV: ${role.atsKeywords.join(', ')}` },
-      { '@type': 'HowToStep', name: 'Avoid common mistakes', text: role.commonMistakes[0] },
-      { '@type': 'HowToStep', name: 'Write strong bullet points', text: role.exampleBullets[0] },
+    '@graph': [
+      {
+        '@type': 'HowTo',
+        name: `How to Write a ${role.title} CV for UK Jobs`,
+        description: `Step-by-step guide to writing an ATS-optimised ${role.title} CV with the right keywords and structure for UK job applications.`,
+        step: [
+          { '@type': 'HowToStep', name: 'Use the right ATS keywords', text: `Include these keywords in your ${role.title} CV: ${role.atsKeywords.join(', ')}` },
+          { '@type': 'HowToStep', name: 'Avoid common mistakes', text: role.commonMistakes[0] },
+          { '@type': 'HowToStep', name: 'Write strong bullet points', text: role.exampleBullets[0] },
+        ],
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://jobagent247.co' },
+          { '@type': 'ListItem', position: 2, name: 'CV Builder', item: 'https://jobagent247.co/cv-builder' },
+          { '@type': 'ListItem', position: 3, name: `${role.title} CV`, item: `https://jobagent247.co/cv-builder/${role.slug}` },
+        ],
+      },
     ],
   })
 

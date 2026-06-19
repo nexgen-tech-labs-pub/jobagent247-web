@@ -1,0 +1,30 @@
+# JobAgent247
+
+> JobAgent247 is an AI-powered job-search platform for UK and India job seekers. Ten specialised AI agents work together to score and rewrite your CV against any job description, find matching live jobs across 50+ UK and Indian job sites, draft tailored cover letters and recruiter messages, track applications, and prepare you for interviews. The ATS target on every generated CV is 90+.
+
+JobAgent247 is built UK-first with India as the second market. UK jobs are sourced live from Reed, Adzuna, CV-Library, CWJobs, JobServe, and Indeed. India jobs are sourced from Naukri, Foundit, Shine, TimesJobs, and Jooble. CV scoring, rewriting, cover letter generation, and interview preparation are powered by Anthropic Claude (claude-sonnet-4-6) with prompt caching.
+
+## Pricing
+
+Three plans. Both UK (GBP) and India (INR) pricing are available. See [/pricing.md](https://jobagent247.co/pricing.md) for a machine-readable price list.
+
+- **Free** — £0/mo. 3 CV analyses, 3 job matches, 2 cover letters, 1 CV rewrite. Per-feature lifetime quota.
+- **Pro** — £9.99/mo or £95.88/yr (UK), $9.99/mo (US), ₹500/mo (India). Unlimited CV analyses + rewrites, 50 job matches/mo, 20 cover letters/mo, application tracker, follow-up drafts.
+- **Career Accelerator** — £29.99/mo or £287.88/yr (UK), ₹1000/mo (India). Everything in Pro, plus unlimited bulk match, unlimited cover letters, DOCX/PDF export, mock interviews, multiple CV versions.
+
+Founding-member trial: the first 100 users get 30 days of Pro free.
+
+## Docs
+
+- [How it works](https://jobagent247.co/how-it-works): Full walkthrough of the 6-stage user journey and all 10 agents.
+- [CV Builder](https://jobagent247.co/cv-builder): Role-specific CV guides with ATS keywords for 20+ job titles.
+- [Learn](https://jobagent247.co/learn): Glossary and how-to articles on ATS scoring, tailored CVs, cover letters, and LinkedIn Easy Apply.
+- [Comparisons](https://jobagent247.co/vs): JobAgent247 versus Jobscan, Rezi, Resume.io, Kickresume, Enhancv, Teal, Novoresume, ChatGPT.
+- [Pricing](https://jobagent247.co/pricing): Live pricing page.
+
+## Optional
+
+- [Sitemap](https://jobagent247.co/sitemap.xml)
+- [India site](https://jobagent247.co/in): Localised content + INR pricing.
+- [Privacy](https://jobagent247.co/privacy)
+- [Terms](https://jobagent247.co/terms)
