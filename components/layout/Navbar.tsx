@@ -25,15 +25,15 @@ export function Navbar() {
       style={{ backdropFilter: 'blur(20px)' }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           <Link href="/" className="inline-flex items-center" aria-label="JobAgent247 home">
             <Image
               src="/jobagent-logo.png"
               alt="JobAgent247"
-              width={154}
-              height={60}
+              width={184}
+              height={72}
               priority
-              className="h-10 w-auto"
+              className="h-12 w-auto md:h-14"
             />
           </Link>
 

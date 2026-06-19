@@ -19,7 +19,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 
 function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center pt-16">
+    <section className="relative min-h-screen flex items-center pt-20">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20" style={{ background: '#8B5CF6' }} />
         <div className="absolute top-1/3 right-1/4 w-80 h-80 rounded-full blur-3xl opacity-15" style={{ background: '#06B6D4' }} />
@@ -511,9 +511,9 @@ function Footer() {
           <Image
             src="/jobagent-logo.png"
             alt="JobAgent247"
-            width={123}
-            height={48}
-            className="h-8 w-auto"
+            width={154}
+            height={60}
+            className="h-12 w-auto"
           />
           <div className="flex flex-wrap justify-center gap-6">
             {['Product', 'How it Works', 'Features', 'Pricing', 'FAQ'].map((link) => (
