@@ -8,7 +8,7 @@ import { SecondaryButton } from '@/components/ui/SecondaryButton'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 const navLinks = [
-  { label: 'Product', href: '#features' },
+  { label: 'How it works', href: '/how-it-works' },
   { label: 'Pricing', href: '#pricing' },
   { label: 'CV Builder', href: '/cv-builder' },
   { label: 'Learn', href: '/learn' },

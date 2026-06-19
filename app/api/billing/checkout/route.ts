@@ -5,12 +5,30 @@ import { getStripe, getPriceId } from '@/lib/stripe'
 
 const logger = console
 
+const VALID_CURRENCIES = new Set(['gbp', 'usd', 'inr'])
+
+function resolveCurrency(
+  bodyCurrency: string | undefined,
+  userLocale: string | null | undefined,
+  acceptLanguage: string | null,
+): 'gbp' | 'usd' | 'inr' {
+  if (bodyCurrency && VALID_CURRENCIES.has(bodyCurrency.toLowerCase())) {
+    return bodyCurrency.toLowerCase() as 'gbp' | 'usd' | 'inr'
+  }
+  if (userLocale === 'in') return 'inr'
+  if (userLocale === 'uk') return 'gbp'
+  const lang = (acceptLanguage ?? '').toLowerCase()
+  if (lang.includes('en-us') || lang.includes('en_us')) return 'usd'
+  if (lang.includes('en-in') || lang.includes('hi')) return 'inr'
+  return 'gbp'
+}
+
 export async function POST(req: NextRequest) {
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await req.json() as { plan?: string; interval?: string }
+  const body = await req.json() as { plan?: string; interval?: string; currency?: string }
   const plan = body.plan ?? 'pro'
   const interval = body.interval ?? 'month'
 
@@ -20,7 +38,7 @@ export async function POST(req: NextRequest) {
     .eq('id', user.id)
     .single()
 
-  const currency = profile?.locale === 'in' ? 'inr' : 'gbp'
+  const currency = resolveCurrency(body.currency, profile?.locale, req.headers.get('accept-language'))
 
   let priceId: string
   try {

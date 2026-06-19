@@ -1,24 +1,27 @@
 import { Navbar } from '@/components/layout/Navbar'
 import { GradientButton } from '@/components/ui/GradientButton'
-import { SecondaryButton } from '@/components/ui/SecondaryButton'
 import { SectionHeader } from '@/components/ui/SectionHeader'
-import { Check, X, Zap } from 'lucide-react'
+import { PricingTable } from '@/components/pricing/PricingTable'
+import { Check, X } from 'lucide-react'
 
 const plans = [
   {
+    key: 'free' as const,
     name: 'Free',
-    price: '£0',
-    period: '/month',
+    priceMonth: '£0',
+    priceYear: '£0',
+    yearlyEqMonth: '£0',
     desc: 'For exploring and building your first profile',
     features: ['1 CV upload', 'Basic CV feedback', '3 job description analyses', 'Basic job tracker', 'Limited AI generations (5/day)'],
     notIncluded: ['Unlimited CV improvements', 'Cover letters', 'Interview prep', 'LinkedIn optimisation'],
     cta: 'Start free',
-    highlight: false,
   },
   {
+    key: 'pro' as const,
     name: 'Pro',
-    price: '£9.99',
-    period: '/month',
+    priceMonth: '£9.99',
+    priceYear: '£95.88',
+    yearlyEqMonth: '£7.99',
     desc: 'For active job seekers who want better applications',
     features: ['Unlimited CV improvements', 'Unlimited job match analysis', 'Tailored cover letters', 'Recruiter messages', 'Interview prep', 'Application tracker', 'LinkedIn optimisation', 'Follow-up suggestions'],
     notIncluded: ['Multiple CV versions', 'Mock interview workflows', 'Weekly job-search plan'],
@@ -27,14 +30,15 @@ const plans = [
     badge: 'Best value',
   },
   {
+    key: 'accelerator' as const,
     name: 'Career Accelerator',
-    price: '£29.99',
-    period: '/month',
+    priceMonth: '£29.99',
+    priceYear: '£287.88',
+    yearlyEqMonth: '£23.99',
     desc: 'For serious job seekers and career switchers',
     features: ['Everything in Pro', 'Advanced role strategy', 'Multiple CV versions', 'Mock interview workflows', 'Weekly job-search plan', 'Priority AI processing', 'Exportable documents'],
     notIncluded: [],
     cta: 'Accelerate my search',
-    highlight: false,
   },
 ]
 
@@ -76,42 +80,8 @@ export default function PricingPage() {
             centered
           />
 
-          {/* Pricing cards */}
-          <div className="grid md:grid-cols-3 gap-6 mb-20">
-            {plans.map((plan) => (
-              <div key={plan.name} className="glass-card p-8 flex flex-col relative"
-                style={plan.highlight ? { border: '1px solid rgba(139,92,246,0.5)', boxShadow: '0 0 40px rgba(139,92,246,0.15)' } : {}}>
-                {plan.badge && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 text-xs font-semibold rounded-full flex items-center gap-1"
-                    style={{ background: 'linear-gradient(135deg, #8B5CF6, #06B6D4)', color: 'white' }}>
-                    <Zap className="w-3 h-3" /> {plan.badge}
-                  </span>
-                )}
-                <div className="mb-6">
-                  <h3 className="font-heading font-bold text-xl text-white mb-1">{plan.name}</h3>
-                  <div className="flex items-baseline gap-1 mb-2">
-                    <span className="font-heading font-bold text-4xl text-white">{plan.price}</span>
-                    <span className="text-sm" style={{ color: '#64748B' }}>{plan.period}</span>
-                  </div>
-                  <p className="text-sm" style={{ color: '#94A3B8' }}>{plan.desc}</p>
-                </div>
-                <ul className="space-y-3 mb-8 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm" style={{ color: '#CBD5E1' }}>
-                      <Check className="w-4 h-4 shrink-0" style={{ color: '#22C55E' }} />{f}
-                    </li>
-                  ))}
-                  {plan.notIncluded.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm" style={{ color: '#3F4A5A' }}>
-                      <X className="w-4 h-4 shrink-0" style={{ color: '#3F4A5A' }} />{f}
-                    </li>
-                  ))}
-                </ul>
-                {plan.highlight
-                  ? <GradientButton href="/dashboard" className="w-full justify-center">{plan.cta}</GradientButton>
-                  : <SecondaryButton href="/dashboard" className="w-full justify-center">{plan.cta}</SecondaryButton>}
-              </div>
-            ))}
+          <div className="mb-20">
+            <PricingTable plans={plans} locale="uk" />
           </div>
 
           {/* Full comparison table */}
@@ -148,7 +118,7 @@ export default function PricingPage() {
 
           <div className="text-center mt-12">
             <p className="text-sm mb-6" style={{ color: '#64748B' }}>No credit card required to start · Cancel anytime · Human review add-on coming soon</p>
-            <GradientButton href="/dashboard" size="lg">Start free today</GradientButton>
+            <GradientButton href="/signup" size="lg">Start free today</GradientButton>
           </div>
         </div>
       </div>

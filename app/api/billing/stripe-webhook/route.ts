@@ -25,6 +25,27 @@ export async function POST(req: NextRequest) {
 
   const admin = createAdminClient()
 
+  // Idempotency — record the event id first. If the row already exists, Stripe
+  // is retrying a previously-processed event; ack with 200 to stop retries.
+  const customerId = (event.data.object as { customer?: string }).customer ?? null
+  const { error: insertError } = await admin.from('stripe_webhook_events').insert({
+    id: event.id,
+    type: event.type,
+    customer_id: customerId,
+    payload: event.data.object,
+  })
+
+  if (insertError) {
+    if (insertError.code === '23505') {
+      // Duplicate — already processed
+      logger.log(`[billing/stripe-webhook] Duplicate event ${event.id} (${event.type}) — skipping`)
+      return NextResponse.json({ received: true, duplicate: true })
+    }
+    Sentry.captureException(insertError, { extra: { eventId: event.id, type: event.type } })
+    logger.error('[billing/stripe-webhook] Failed to record event:', insertError)
+    return NextResponse.json({ error: 'Failed to record event' }, { status: 500 })
+  }
+
   try {
     if (
       event.type === 'customer.subscription.created' ||
@@ -32,23 +53,25 @@ export async function POST(req: NextRequest) {
       event.type === 'customer.subscription.deleted'
     ) {
       const sub = event.data.object as Stripe.Subscription
-      const customerId = sub.customer as string
+      const subCustomerId = sub.customer as string
       const priceId = sub.items.data[0]?.price.id ?? ''
       const newPlan = planFromSubscription(sub.status, priceId)
 
       const { error } = await admin
         .from('users')
         .update({ plan: newPlan })
-        .eq('stripe_customer_id', customerId)
+        .eq('stripe_customer_id', subCustomerId)
 
       if (error) {
-        Sentry.captureException(error, { extra: { event: event.type, customerId } })
+        Sentry.captureException(error, { extra: { event: event.type, customerId: subCustomerId } })
         logger.error('[billing/stripe-webhook] DB update failed:', error)
         return NextResponse.json({ error: 'DB update failed' }, { status: 500 })
       }
 
-      logger.log(`[billing/stripe-webhook] ${event.type} → plan=${newPlan} customer=${customerId}`)
+      logger.log(`[billing/stripe-webhook] ${event.type} → plan=${newPlan} customer=${subCustomerId}`)
     }
+
+    await admin.from('stripe_webhook_events').update({ processed_at: new Date().toISOString() }).eq('id', event.id)
   } catch (err) {
     Sentry.captureException(err, { extra: { event: event.type } })
     logger.error('[billing/stripe-webhook] Handler error:', err)
