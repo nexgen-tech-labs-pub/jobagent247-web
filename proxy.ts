@@ -20,21 +20,39 @@ const protectedRoutes = [
   '/onboarding',
 ]
 
+// Rate-limiter is a defence layer, not a hard dependency. If Upstash env vars
+// are missing or malformed, the middleware fails open: the request is allowed
+// through and we log once, instead of taking the whole site down with 500s.
 let _ipRatelimit: Ratelimit | null = null
-function getIpRatelimit() {
-  if (!_ipRatelimit) {
-    const redis = new Redis({ url: process.env.UPSTASH_REDIS_REST_URL!, token: process.env.UPSTASH_REDIS_REST_TOKEN! })
-    _ipRatelimit = new Ratelimit({ redis, limiter: Ratelimit.fixedWindow(60, '1 m'), prefix: 'ip' })
+let _ipRatelimitInitTried = false
+function getIpRatelimit(): Ratelimit | null {
+  if (_ipRatelimit || _ipRatelimitInitTried) return _ipRatelimit
+  _ipRatelimitInitTried = true
+  const url = process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+  if (!url || !token || !url.startsWith('https://')) {
+    console.warn('[proxy] IP rate-limit disabled — UPSTASH_REDIS_REST_URL missing or not https')
+    return null
   }
-  return _ipRatelimit
+  try {
+    const redis = new Redis({ url, token })
+    _ipRatelimit = new Ratelimit({ redis, limiter: Ratelimit.fixedWindow(60, '1 m'), prefix: 'ip' })
+    return _ipRatelimit
+  } catch (err) {
+    console.warn('[proxy] IP rate-limit disabled — Redis init failed:', err)
+    return null
+  }
 }
 
 export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith('/api/')) {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown'
-    const { success } = await getIpRatelimit().limit(ip)
-    if (!success) {
-      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+    const limiter = getIpRatelimit()
+    if (limiter) {
+      const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown'
+      const { success } = await limiter.limit(ip)
+      if (!success) {
+        return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+      }
     }
   }
 
