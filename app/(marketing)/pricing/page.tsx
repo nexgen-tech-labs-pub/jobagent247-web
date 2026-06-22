@@ -1,8 +1,14 @@
+import type { Metadata } from 'next'
 import { Navbar } from '@/components/layout/Navbar'
 import { GradientButton } from '@/components/ui/GradientButton'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { PricingTable } from '@/components/pricing/PricingTable'
 import { Check, X } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Pricing — JobAgent247',
+  description: 'Simple, transparent pricing. Free plan available. Pro from £9.99/mo, Career Accelerator from £29.99/mo. Cancel anytime via Stripe.',
+}
 
 const plans = [
   {

@@ -1,8 +1,14 @@
+import type { Metadata } from 'next'
 import { Navbar } from '@/components/layout/Navbar'
 import { GradientButton } from '@/components/ui/GradientButton'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { PricingTable } from '@/components/pricing/PricingTable'
 import { Check, X } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Pricing India — JobAgent247',
+  description: 'Simple INR pricing for India. Free plan available. Pro from ₹500/mo, Career Accelerator from ₹1,000/mo. Cancel anytime.',
+}
 
 const comparisonRows = [
   'Resume upload & parsing',

@@ -7,8 +7,7 @@ import { classifyRole, getRoleProfile } from '@/lib/db/role-profiles'
 
 export async function POST(request: NextRequest) {
   const supabase = await createServerClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError) return NextResponse.json({ error: 'Auth error' }, { status: 500 })
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
