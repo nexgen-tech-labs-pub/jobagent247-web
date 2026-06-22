@@ -1,6 +1,7 @@
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { RecentDocuments } from '@/components/dashboard/RecentDocuments'
 import { FoundingMemberBanner } from '@/components/dashboard/FoundingMemberBanner'
+import { FreeTierBanner } from '@/components/billing/FreeTierBanner'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { GradientButton } from '@/components/ui/GradientButton'
 import { StatusBadge } from '@/components/ui/StatusBadge'
@@ -25,7 +26,7 @@ async function getDashboardData() {
   if (!user) return null
 
   const [profileRes, cvsRes, userJobsRes, topJobsRes] = await Promise.all([
-    supabase.from('users').select('name, onboarding_complete, current_role, keywords, location, founding_member, trial_ends_at').eq('id', user.id).single(),
+    supabase.from('users').select('name, onboarding_complete, current_role, keywords, location, founding_member, trial_ends_at, plan, locale').eq('id', user.id).single(),
     supabase.from('cvs').select('id').eq('user_id', user.id),
     supabase.from('user_jobs').select('status, match_score, follow_up_date, applied_at').eq('user_id', user.id),
     supabase.from('jobs').select('id, title, company, location, type, visa_sponsorship').order('scraped_at', { ascending: false }).limit(3),
@@ -62,27 +63,35 @@ async function getDashboardData() {
     suggestedActions,
     foundingMember: profile?.founding_member ?? false,
     trialEndsAt: profile?.trial_ends_at ?? null,
+    plan: (profile?.plan ?? 'free') as 'free' | 'pro' | 'accelerator',
+    locale: (profile?.locale ?? 'uk') as 'uk' | 'in',
   }
 }
 
 export default async function DashboardPage() {
   const data = await getDashboardData()
-  const { name, metrics, topJobs, suggestedActions, foundingMember, trialEndsAt } = data ?? {
+  const { name, metrics, topJobs, suggestedActions, foundingMember, trialEndsAt, plan, locale } = data ?? {
     name: 'there',
     metrics: { profileStrength: 0, cvReadiness: 0, jobMatchAverage: 0, applicationsThisWeek: 0, interviewsScheduled: 0, followUpsDue: 0 },
     topJobs: [],
     suggestedActions: [],
     foundingMember: false,
     trialEndsAt: null,
+    plan: 'free' as const,
+    locale: 'uk' as const,
   }
 
   return (
     <DashboardLayout title="Overview">
-      {foundingMember && trialEndsAt && (
+      {foundingMember && trialEndsAt ? (
         <div className="mb-6">
           <FoundingMemberBanner trialEndsAt={trialEndsAt} />
         </div>
-      )}
+      ) : plan === 'free' ? (
+        <div className="mb-6">
+          <FreeTierBanner plan={plan} locale={locale} />
+        </div>
+      ) : null}
       <div className="mb-8">
         <h2 className="font-heading font-bold text-2xl text-white mb-1">
           Welcome back, {name.split(' ')[0]}.

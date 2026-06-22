@@ -8,6 +8,7 @@ import { GradientButton } from '@/components/ui/GradientButton'
 import { SecondaryButton } from '@/components/ui/SecondaryButton'
 import { Upload, Zap, Download, ArrowRight, CheckCircle, XCircle, Loader2, Lock, FileText, MessageSquare, Copy } from 'lucide-react'
 import { getBrowserClient } from '@/lib/supabase-browser'
+import { FreeTierBanner } from '@/components/billing/FreeTierBanner'
 import type { CV, CVAnalysisResult } from '@/lib/types/database'
 
 function CVAgentInner() {
@@ -32,6 +33,8 @@ function CVAgentInner() {
   const [generatingRM, setGeneratingRM] = useState(false)
   const [recruiterMessage, setRecruiterMessage] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [plan, setPlan] = useState<'free' | 'pro' | 'accelerator'>('free')
+  const [locale, setLocale] = useState<'uk' | 'in'>('uk')
 
   useEffect(() => {
     const supabase = getBrowserClient()
@@ -39,15 +42,27 @@ function CVAgentInner() {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
-        const { data } = await supabase
-          .from('cvs')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-        if (!data) return
-        setCvList(data as CV[])
-        const primary = (data as CV[]).find((c) => c.is_primary) ?? (data as CV[])[0]
-        if (primary) setSelectedCvId(primary.id)
+        const [cvsRes, profileRes] = await Promise.all([
+          supabase
+            .from('cvs')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false }),
+          supabase
+            .from('users')
+            .select('plan, locale')
+            .eq('id', user.id)
+            .single(),
+        ])
+        if (cvsRes.data) {
+          setCvList(cvsRes.data as CV[])
+          const primary = (cvsRes.data as CV[]).find((c) => c.is_primary) ?? (cvsRes.data as CV[])[0]
+          if (primary) setSelectedCvId(primary.id)
+        }
+        if (profileRes.data) {
+          setPlan((profileRes.data.plan as 'free' | 'pro' | 'accelerator') ?? 'free')
+          setLocale((profileRes.data.locale as 'uk' | 'in') ?? 'uk')
+        }
       } catch {
         // silently ignore — user stays on page with empty CV list
       }
@@ -315,6 +330,11 @@ function CVAgentInner() {
 
   return (
     <DashboardLayout title="CV Agent">
+      {plan === 'free' && (
+        <div className="mb-6">
+          <FreeTierBanner plan={plan} locale={locale} />
+        </div>
+      )}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Input panel */}
         <div className="space-y-4">

@@ -15,11 +15,16 @@ interface SettingsClientProps {
   plan: 'free' | 'pro' | 'accelerator'
   locale: 'uk' | 'in'
   creditsBalance: number
+  stripeCustomerId: string | null
+  foundingMember: boolean
+  trialEndsAt: string | null
 }
 
-export function SettingsClient({ name, email, location, plan, locale }: SettingsClientProps) {
+export function SettingsClient({ name, email, location, plan, locale, stripeCustomerId, foundingMember, trialEndsAt }: SettingsClientProps) {
   const [saved, setSaved] = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
+  const [portalLoading, setPortalLoading] = useState(false)
+  const [portalError, setPortalError] = useState<string | null>(null)
 
   const handleSave = () => {
     setSaved(true)
@@ -43,6 +48,27 @@ export function SettingsClient({ name, email, location, plan, locale }: Settings
       setCheckoutLoading(null)
     }
   }
+
+  const handlePortal = async () => {
+    setPortalLoading(true)
+    setPortalError(null)
+    try {
+      const res = await fetch('/api/billing/portal', { method: 'POST' })
+      const data = await res.json() as { url?: string; error?: string }
+      if (!res.ok || data.error) throw new Error(data.error ?? 'Could not open billing portal')
+      if (data.url) {
+        window.location.href = data.url
+      }
+    } catch (err) {
+      setPortalError(err instanceof Error ? err.message : 'Could not open billing portal')
+    } finally {
+      setPortalLoading(false)
+    }
+  }
+
+  const hasActiveSubscription = !!stripeCustomerId
+  const onTrial = foundingMember && !stripeCustomerId && plan !== 'free' && !!trialEndsAt
+  const trialEndDate = trialEndsAt ? new Date(trialEndsAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : null
 
   const planLabel =
     plan === 'accelerator' ? 'Career Accelerator' : plan === 'pro' ? 'Pro' : 'Free'
@@ -176,10 +202,38 @@ export function SettingsClient({ name, email, location, plan, locale }: Settings
                 </>
               )}
 
-              {plan !== 'free' && (
-                <form action="/api/billing/portal" method="POST">
-                  <button type="submit" className="btn-secondary px-4 py-2 text-sm">Manage subscription</button>
-                </form>
+              {onTrial && (
+                <div className="rounded-xl p-5 mb-4" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
+                  <p className="text-sm font-medium text-white mb-1">
+                    Founding-member trial active
+                  </p>
+                  <p className="text-sm mb-3" style={{ color: '#CBD5E1' }}>
+                    Your free Pro trial runs until <span className="font-semibold text-white">{trialEndDate}</span>. Add a payment method to keep Pro after the trial ends — no charge today.
+                  </p>
+                  <button
+                    className="btn-gradient text-sm px-4 py-2 disabled:opacity-60"
+                    disabled={checkoutLoading === 'pro'}
+                    onClick={() => handleCheckout('pro')}
+                  >
+                    {checkoutLoading === 'pro' ? 'Processing…' : 'Add payment method'}
+                  </button>
+                </div>
+              )}
+
+              {hasActiveSubscription && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={handlePortal}
+                    disabled={portalLoading}
+                    className="btn-secondary px-4 py-2 text-sm disabled:opacity-60"
+                  >
+                    {portalLoading ? 'Opening…' : 'Manage subscription'}
+                  </button>
+                  {portalError && (
+                    <p className="text-xs mt-2" style={{ color: '#EF4444' }}>{portalError}</p>
+                  )}
+                </div>
               )}
 
               <p className="text-xs mt-4" style={{ color: '#64748B' }}>
