@@ -26,6 +26,7 @@ const protectedRoutes = [
 // through and we log once, instead of taking the whole site down with 500s.
 let _ipRatelimit: Ratelimit | null = null
 let _ipRatelimitInitTried = false
+let _ipRatelimitRuntimeErrorReported = false
 function getIpRatelimit(): Ratelimit | null {
   if (_ipRatelimit || _ipRatelimitInitTried) return _ipRatelimit
   _ipRatelimitInitTried = true
@@ -60,9 +61,25 @@ export async function proxy(request: NextRequest) {
     const limiter = getIpRatelimit()
     if (limiter) {
       const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown'
-      const { success } = await limiter.limit(ip)
-      if (!success) {
-        return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+      try {
+        const { success } = await limiter.limit(ip)
+        if (!success) {
+          return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+        }
+      } catch (err) {
+        // Runtime Upstash failures (auth, network, quota) must not 500 the site —
+        // rate-limiting is a defence layer, not a load-bearing dependency.
+        // Disable the limiter for the rest of this process so subsequent requests
+        // skip the failing call entirely instead of retrying every time.
+        _ipRatelimit = null
+        if (!_ipRatelimitRuntimeErrorReported) {
+          _ipRatelimitRuntimeErrorReported = true
+          console.warn('[proxy] IP rate-limit disabled at runtime:', err)
+          Sentry.captureException(err, {
+            level: 'warning',
+            tags: { component: 'proxy', subsystem: 'rate-limit', stage: 'runtime' },
+          })
+        }
       }
     }
   }
