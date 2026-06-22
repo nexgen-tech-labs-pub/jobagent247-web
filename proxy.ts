@@ -159,7 +159,12 @@ export async function proxy(request: NextRequest) {
       .eq('id', user.id)
       .single()
 
-    if (profile && !profile.onboarding_complete) {
+    // Treat a missing profile row the same as onboarding_complete = false.
+    // Defensive: the auth trigger should always create the row at signup,
+    // but if it ever fails or is bypassed (e.g. user created via SQL), we
+    // still want the user routed through onboarding rather than seeing an
+    // empty dashboard.
+    if (!profile || !profile.onboarding_complete) {
       const url = request.nextUrl.clone()
       url.pathname = '/onboarding'
       return NextResponse.redirect(url)
