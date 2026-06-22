@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs'
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
 import { createServerClient } from '@supabase/ssr'
@@ -31,7 +32,13 @@ function getIpRatelimit(): Ratelimit | null {
   const url = process.env.UPSTASH_REDIS_REST_URL
   const token = process.env.UPSTASH_REDIS_REST_TOKEN
   if (!url || !token || !url.startsWith('https://')) {
-    console.warn('[proxy] IP rate-limit disabled — UPSTASH_REDIS_REST_URL missing or not https')
+    const reason = !url
+      ? 'UPSTASH_REDIS_REST_URL not set'
+      : !token
+      ? 'UPSTASH_REDIS_REST_TOKEN not set'
+      : 'UPSTASH_REDIS_REST_URL does not start with https://'
+    console.warn(`[proxy] IP rate-limit disabled — ${reason}`)
+    Sentry.captureMessage(`proxy: IP rate-limit disabled — ${reason}`, 'warning')
     return null
   }
   try {
@@ -40,6 +47,10 @@ function getIpRatelimit(): Ratelimit | null {
     return _ipRatelimit
   } catch (err) {
     console.warn('[proxy] IP rate-limit disabled — Redis init failed:', err)
+    Sentry.captureException(err, {
+      level: 'warning',
+      tags: { component: 'proxy', subsystem: 'rate-limit' },
+    })
     return null
   }
 }
