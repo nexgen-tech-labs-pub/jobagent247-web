@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { after } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { sendWelcomeIfFirstTime } from '@/lib/email-welcome'
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -25,8 +27,14 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
+      // Welcome email — first-time only, idempotent at the campaign level,
+      // and fire-and-forget so SMTP latency never blocks the redirect.
+      if (data?.user?.id) {
+        const userId = data.user.id
+        after(() => sendWelcomeIfFirstTime(userId))
+      }
       return NextResponse.redirect(`${origin}${next}`)
     }
   }
