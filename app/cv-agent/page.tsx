@@ -7,6 +7,7 @@ import { GlassCard } from '@/components/ui/GlassCard'
 import { GradientButton } from '@/components/ui/GradientButton'
 import { SecondaryButton } from '@/components/ui/SecondaryButton'
 import { Upload, Zap, Download, ArrowRight, CheckCircle, XCircle, Loader2, Lock, FileText, MessageSquare, Copy } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
 import { getBrowserClient } from '@/lib/supabase-browser'
 import { FreeTierBanner } from '@/components/billing/FreeTierBanner'
 import type { CV, CVAnalysisResult } from '@/lib/types/database'
@@ -424,26 +425,42 @@ function CVAgentInner() {
           </GlassCard>
 
           <div className="flex gap-3">
-            <SecondaryButton
-              size="sm"
-              className="flex-1 justify-center"
-              onClick={handleCoverLetter}
-              disabled={generatingCL || !selectedCvId || !jobDescription.trim()}
-            >
-              {generatingCL
-                ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Writing…</>
-                : <><FileText className="w-3.5 h-3.5" /> Cover Letter</>}
-            </SecondaryButton>
-            <SecondaryButton
-              size="sm"
-              className="flex-1 justify-center"
-              onClick={handleRecruiterMessage}
-              disabled={generatingRM || !selectedCvId || !jobDescription.trim()}
-            >
-              {generatingRM
-                ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Writing…</>
-                : <><MessageSquare className="w-3.5 h-3.5" /> Recruiter Message</>}
-            </SecondaryButton>
+            <div className="flex-1 flex flex-col gap-1.5">
+              <SecondaryButton
+                size="sm"
+                className="w-full justify-center"
+                onClick={handleCoverLetter}
+                disabled={generatingCL || !selectedCvId || !jobDescription.trim()}
+              >
+                {generatingCL
+                  ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Writing…</>
+                  : <><FileText className="w-3.5 h-3.5" /> Cover Letter</>}
+              </SecondaryButton>
+              {coverLetter && !generatingCL && (
+                <a href="#cover-letter-output" className="inline-flex items-center justify-center gap-1 text-xs px-2 py-1 rounded-full"
+                  style={{ background: 'rgba(34,197,94,0.12)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.3)' }}>
+                  <CheckCircle className="w-3 h-3" /> Cover letter ready · view below
+                </a>
+              )}
+            </div>
+            <div className="flex-1 flex flex-col gap-1.5">
+              <SecondaryButton
+                size="sm"
+                className="w-full justify-center"
+                onClick={handleRecruiterMessage}
+                disabled={generatingRM || !selectedCvId || !jobDescription.trim()}
+              >
+                {generatingRM
+                  ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Writing…</>
+                  : <><MessageSquare className="w-3.5 h-3.5" /> Recruiter Message</>}
+              </SecondaryButton>
+              {recruiterMessage && !generatingRM && (
+                <a href="#recruiter-message-output" className="inline-flex items-center justify-center gap-1 text-xs px-2 py-1 rounded-full"
+                  style={{ background: 'rgba(34,197,94,0.12)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.3)' }}>
+                  <CheckCircle className="w-3 h-3" /> Message ready · view below
+                </a>
+              )}
+            </div>
           </div>
 
           {error && (
@@ -469,8 +486,10 @@ function CVAgentInner() {
           {/* Score */}
           <GlassCard className="p-6">
             <h3 className="font-heading font-semibold text-white mb-4">ATS Score</h3>
-            <div className="flex items-center gap-6">
-              <div className="relative w-28 h-28">
+
+            {/* Top row: donut + headline */}
+            <div className="flex items-center gap-6 mb-4">
+              <div className="relative w-28 h-28 shrink-0">
                 <svg className="w-28 h-28 -rotate-90" viewBox="0 0 36 36">
                   <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2.5" />
                   <circle
@@ -490,25 +509,54 @@ function CVAgentInner() {
                 </div>
               </div>
               <div>
-                <p className="text-sm font-medium text-white mb-1">
+                <p className="text-base font-medium text-white mb-1">
                   {result
                     ? result.score >= 90 ? 'Strong match' : result.score >= 70 ? 'Good match' : 'Needs improvement'
                     : storedScore != null ? 'Last known score' : 'Run agent to score'}
                 </p>
-                <p className="text-xs" style={{ color: '#94A3B8' }}>
-                  {result
-                    ? result.summary
-                    : storedScore != null
-                    ? 'Paste a job description and click Run CV Agent for a fresh score against this role.'
-                    : 'Paste a job description and click Run CV Agent'}
-                </p>
+                {!result && (
+                  <p className="text-sm" style={{ color: '#94A3B8' }}>
+                    {storedScore != null
+                      ? 'Paste a job description and click Run CV Agent for a fresh score against this role.'
+                      : 'Paste a job description and click Run CV Agent.'}
+                  </p>
+                )}
                 {result && (
-                  <p className="text-xs mt-1" style={{ color: '#64748B' }}>
+                  <p className="text-xs" style={{ color: '#64748B' }}>
                     {result.remaining} application{result.remaining !== 1 ? 's' : ''} remaining today
                   </p>
                 )}
               </div>
             </div>
+
+            {/* Full-width analysis — markdown-rendered */}
+            {result && (
+              <div
+                className="text-sm leading-relaxed prose-cv"
+                style={{ color: '#CBD5E1' }}
+              >
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
+                    strong: ({ children }) => <strong style={{ color: '#F8FAFC', fontWeight: 600 }}>{children}</strong>,
+                    em: ({ children }) => <em style={{ color: '#E2E8F0', fontStyle: 'italic' }}>{children}</em>,
+                    ul: ({ children }) => <ul className="list-disc pl-5 mb-3 space-y-1">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal pl-5 mb-3 space-y-1">{children}</ol>,
+                    li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                    code: ({ children }) => (
+                      <code className="px-1 py-0.5 rounded text-xs" style={{ background: 'rgba(139,92,246,0.15)', color: '#A78BFA' }}>
+                        {children}
+                      </code>
+                    ),
+                    h1: ({ children }) => <h4 className="font-semibold text-white mt-3 mb-2 text-base">{children}</h4>,
+                    h2: ({ children }) => <h4 className="font-semibold text-white mt-3 mb-2 text-base">{children}</h4>,
+                    h3: ({ children }) => <h5 className="font-semibold text-white mt-2 mb-1 text-sm">{children}</h5>,
+                  }}
+                >
+                  {result.summary}
+                </ReactMarkdown>
+              </div>
+            )}
           </GlassCard>
 
           {/* Missing keywords */}
@@ -599,6 +647,7 @@ function CVAgentInner() {
 
           {/* Cover letter output */}
           {(coverLetter || generatingCL) && (
+            <div id="cover-letter-output">
             <GlassCard className="p-6">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-heading font-semibold text-white">Cover Letter</h3>
@@ -617,18 +666,20 @@ function CVAgentInner() {
                 </div>
               )}
               {coverLetter && (
-                <pre className="text-xs whitespace-pre-wrap max-h-96 overflow-y-auto leading-relaxed" style={{ color: '#CBD5E1', fontFamily: 'inherit' }}>
+                <pre className="text-sm whitespace-pre-wrap max-h-96 overflow-y-auto leading-relaxed" style={{ color: '#CBD5E1', fontFamily: 'inherit' }}>
                   {coverLetter}
                 </pre>
               )}
             </GlassCard>
+            </div>
           )}
 
-          {/* Recruiter message output */}
+          {/* Recruiter / hiring-manager outreach message (FROM the job seeker) */}
           {recruiterMessage && (
+            <div id="recruiter-message-output">
             <GlassCard className="p-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-heading font-semibold text-white">Recruiter Message</h3>
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="font-heading font-semibold text-white">Outreach Message</h3>
                 <button
                   onClick={() => navigator.clipboard.writeText(recruiterMessage)}
                   className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full transition-colors"
@@ -636,9 +687,13 @@ function CVAgentInner() {
                   <Copy className="w-3 h-3" /> Copy
                 </button>
               </div>
-              <p className="text-sm leading-relaxed" style={{ color: '#CBD5E1' }}>{recruiterMessage}</p>
+              <p className="text-xs mb-3" style={{ color: '#64748B' }}>
+                From you — to a recruiter or hiring manager. Paste into LinkedIn InMail or email.
+              </p>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#CBD5E1' }}>{recruiterMessage}</p>
               <p className="text-xs mt-2" style={{ color: '#64748B' }}>{recruiterMessage.split(/\s+/).length} words</p>
             </GlassCard>
+            </div>
           )}
         </div>
       </div>

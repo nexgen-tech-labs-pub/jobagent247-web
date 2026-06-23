@@ -218,18 +218,31 @@ export async function generateRecruiterMessage(
 ): Promise<string> {
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 300,
+    max_tokens: 350,
     system: [
       {
         type: 'text',
-        text: `You are an expert career coach writing LinkedIn InMail / recruiter outreach messages.\nRules: 150 words maximum. Reference the specific role by name. Include one concrete achievement from the CV that is relevant to the role. End with a clear call to action. Do not open with "I hope this finds you well" or similar filler.\n\nCandidate CV:\n${cvText}`,
+        text: `You write personalised outreach messages FROM a job seeker TO a recruiter or hiring manager. The job seeker is the candidate whose CV is provided below — they are introducing themselves, expressing interest in the specific role, and giving a concise pitch for why they fit.
+
+Write in first person from the candidate's perspective ("I noticed your role", "My experience at...", "I'd welcome a 15-minute conversation"). NEVER write as if you are the recruiter evaluating the candidate.
+
+Strict rules:
+- 120–150 words max. LinkedIn InMail / cold-DM length, not a cover letter.
+- Open with a one-line hook tying the candidate's background to the specific role or company — no "I hope this finds you well" filler.
+- Include 1–2 concrete, quantified achievements from the CV that map to the role's requirements (e.g. "reduced deployment time by 60%", "led a team of 8").
+- Close with a soft CTA: a 15-min chat, a screening call, or sharing more material. Do not demand an interview.
+- Tone: confident, warm, professional. No buzzwords like "synergy", "results-driven", "passionate about".
+- Output the message body only. No subject line, no signature, no markdown.
+
+Candidate CV:
+${cvText}`,
         cache_control: { type: 'ephemeral' },
       },
     ] as Anthropic.TextBlockParam[],
     messages: [
       {
         role: 'user',
-        content: `Write a recruiter outreach message for:\n\nRole: ${jobTitle}\nCompany: ${company || 'the company'}\n\nJob Description:\n${jobDescription}`,
+        content: `Write the outreach message to a recruiter/hiring manager at ${company || 'the company'} about this role:\n\nRole: ${jobTitle}\nCompany: ${company || 'the company'}\n\nJob Description:\n${jobDescription}`,
       },
     ],
   })
