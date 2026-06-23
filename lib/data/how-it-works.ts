@@ -74,15 +74,15 @@ const UK_STAGES: Stage[] = [
     num: 5,
     iconName: 'Send',
     title: 'Apply with tailored materials',
-    body: 'For each role, generate a tailored CV, cover letter, and recruiter outreach message — all aware of the specific job description, your profile, and your evidence library. Export to DOCX or PDF.',
-    agents: ['cv-agent', 'applications'],
+    body: 'For each role, generate a tailored CV, cover letter, and recruiter outreach message — all aware of the specific job description, your profile, and your evidence library. Mark roles as applied and add them to your pipeline. Export to DOCX or PDF.',
+    agents: ['applications', 'cv-agent'],
   },
   {
     num: 6,
     iconName: 'CheckCircle2',
-    title: 'Track, follow up, and prep for interviews',
-    body: 'The Applications tracker pipelines every role from saved to offer. Follow-Ups surfaces reminders so nothing falls through the gaps. Interview Prep generates role-specific questions, STAR answers, and a 7-day prep plan once you land an interview.',
-    agents: ['applications', 'follow-ups', 'interview-prep'],
+    title: 'Follow up and prep for interviews',
+    body: 'Follow-Ups surfaces reminders so nothing falls through the gaps after you apply. Interview Prep generates role-specific questions, STAR answers, and a 7-day prep plan the moment you land an interview.',
+    agents: ['follow-ups', 'interview-prep'],
   },
 ]
 
@@ -189,7 +189,7 @@ const UK_AGENTS: Agent[] = [
       'Status timeline so nothing falls through',
     ],
     href: '/applications',
-    stage: 6,
+    stage: 5,
   },
   {
     slug: 'follow-ups',

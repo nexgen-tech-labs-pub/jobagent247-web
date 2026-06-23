@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { GradientButton } from '@/components/ui/GradientButton'
@@ -220,7 +221,8 @@ export default function JobMatchesPage() {
           </div>
           {(['All', 'Permanent', 'Contract'] as const).map(t => (
             <button key={t}
-              onClick={() => { setTypeFilter(t); void loadJobs(keyword, t, 1) }}
+              type="button"
+              onClick={() => setTypeFilter(t)}
               className="px-4 py-2 rounded-xl text-sm font-medium transition-colors"
               style={typeFilter === t
                 ? { background: 'rgba(139,92,246,0.2)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,0.4)' }
@@ -228,6 +230,9 @@ export default function JobMatchesPage() {
               {t}
             </button>
           ))}
+          <SecondaryButton size="sm" onClick={handleFilter} className="shrink-0">
+            Apply filters
+          </SecondaryButton>
           <GradientButton size="sm" onClick={startFetch} disabled={isFetching} className="shrink-0">
             {isFetching
               ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Finding…</>
@@ -239,7 +244,14 @@ export default function JobMatchesPage() {
           <p className="text-xs mt-2" style={{ color: '#22C55E' }}>Job search complete — results updated.</p>
         )}
         {fetchError && (
-          <p className="text-xs mt-2" style={{ color: '#EF4444' }}>{fetchError}</p>
+          <p className="text-xs mt-2" style={{ color: '#EF4444' }}>
+            {fetchError}
+            {fetchError.toLowerCase().includes('profile') && (
+              <>
+                {' '}<Link href="/profile" className="underline" style={{ color: '#EF4444' }}>Open profile →</Link>
+              </>
+            )}
+          </p>
         )}
       </GlassCard>
 
