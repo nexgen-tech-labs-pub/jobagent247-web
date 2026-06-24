@@ -71,7 +71,7 @@ export default function DataCompliancePage() {
           <p>Where we rely on consent as a lawful basis under Indian law, we will ensure consent is freely given, specific, informed, and unambiguous. Users may withdraw consent at any time by contacting us.</p>
         </SubSection>
         <SubSection title="Grievance Officer">
-          <p>For data-related complaints or requests from Indian users, please contact us at <a href="mailto:media@jobsagent247.com" className="underline" style={{ color: '#8B5CF6' }}>media@jobsagent247.com</a>. We will endeavour to respond within a reasonable timeframe in accordance with applicable requirements.</p>
+          <p>For data-related complaints or requests from Indian users, please contact us at <a href="mailto:media@jobagent247.co" className="underline" style={{ color: '#8B5CF6' }}>media@jobagent247.co</a>. We will endeavour to respond within a reasonable timeframe in accordance with applicable requirements.</p>
         </SubSection>
       </Section>
 
@@ -86,7 +86,7 @@ export default function DataCompliancePage() {
           <p>In the event of a personal data breach that is likely to result in risk to affected individuals, we will take appropriate steps including notifying relevant supervisory authorities and affected users as required by applicable law.</p>
         </SubSection>
         <SubSection title="Security Disclosure">
-          <p>If you discover a security vulnerability, please report it responsibly to <a href="mailto:media@jobsagent247.com" className="underline" style={{ color: '#8B5CF6' }}>media@jobsagent247.com</a>.</p>
+          <p>If you discover a security vulnerability, please report it responsibly to <a href="mailto:media@jobagent247.co" className="underline" style={{ color: '#8B5CF6' }}>media@jobagent247.co</a>.</p>
         </SubSection>
       </Section>
 
@@ -95,7 +95,7 @@ export default function DataCompliancePage() {
         <div className="p-4 rounded-xl text-sm" style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)' }}>
           <p className="font-semibold text-[color:var(--foreground)]">Nexgen Tech Labs</p>
           <p>Registered and operated in the United Kingdom</p>
-          <p>Email: <a href="mailto:media@jobsagent247.com" className="underline" style={{ color: '#8B5CF6' }}>media@jobsagent247.com</a></p>
+          <p>Email: <a href="mailto:media@jobagent247.co" className="underline" style={{ color: '#8B5CF6' }}>media@jobagent247.co</a></p>
         </div>
         <p>This notice reflects our current understanding of applicable obligations.</p>
       </Section>

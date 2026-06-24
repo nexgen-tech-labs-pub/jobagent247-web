@@ -527,7 +527,7 @@ function Footer() {
           <Link href="/terms" className="text-xs hover:underline" style={{ color: '#64748B' }}>Terms &amp; Conditions</Link>
           <Link href="/privacy" className="text-xs hover:underline" style={{ color: '#64748B' }}>Privacy Policy</Link>
           <Link href="/data-compliance" className="text-xs hover:underline" style={{ color: '#64748B' }}>Data Compliance</Link>
-          <a href="mailto:media@jobsagent247.com" className="text-xs hover:underline" style={{ color: '#64748B' }}>Contact</a>
+          <a href="mailto:media@jobagent247.co" className="text-xs hover:underline" style={{ color: '#64748B' }}>Contact</a>
           <span className="text-xs" style={{ color: '#334155' }}>Registered in the United Kingdom</span>
         </div>
       </div>

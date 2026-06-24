@@ -77,7 +77,12 @@ export async function listAnalysesForUser(
     .eq('user_id', userId)
     .order('fit_score', { ascending: false })
     .limit(limit)
-  return (data ?? []) as JobFitAnalysisWithJob[]
+  // The Supabase join returns saved_job as nullable when the referenced
+  // saved_jobs row was deleted (cascade should prevent this, but historical
+  // orphans exist). Strip those — an analysis with no job context isn't
+  // renderable, so don't ship it to the UI.
+  const rows = (data ?? []) as (Omit<JobFitAnalysisWithJob, 'saved_job'> & { saved_job: JobFitAnalysisWithJob['saved_job'] | null })[]
+  return rows.filter((a): a is JobFitAnalysisWithJob => a.saved_job != null)
 }
 
 export async function upsertFeedback(

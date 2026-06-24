@@ -105,7 +105,7 @@ export default function TermsPage() {
       </Section>
 
       <Section title="16. Contact">
-        <p>For questions about these Terms, please contact us at: <a href="mailto:media@jobsagent247.com" className="underline" style={{ color: '#8B5CF6' }}>media@jobsagent247.com</a></p>
+        <p>For questions about these Terms, please contact us at: <a href="mailto:media@jobagent247.co" className="underline" style={{ color: '#8B5CF6' }}>media@jobagent247.co</a></p>
       </Section>
 
     </LegalLayout>

@@ -15,7 +15,7 @@ export default function PrivacyPage() {
 
       <Section title="1. Who We Are">
         <p>JobAgent247 is operated by <strong>Nexgen Tech Labs</strong>, registered and based in the <strong>United Kingdom</strong>. We are the data controller for personal data processed through the JobAgent247 platform.</p>
-        <p>Contact for all data, privacy, and compliance queries: <a href="mailto:media@jobsagent247.com" className="underline" style={{ color: '#8B5CF6' }}>media@jobsagent247.com</a></p>
+        <p>Contact for all data, privacy, and compliance queries: <a href="mailto:media@jobagent247.co" className="underline" style={{ color: '#8B5CF6' }}>media@jobagent247.co</a></p>
       </Section>
 
       <Section title="2. What Personal Data We Collect">
@@ -101,7 +101,7 @@ export default function PrivacyPage() {
           <li><strong>Withdrawal of consent:</strong> Withdraw consent at any time where processing is based on consent.</li>
           <li><strong>Complaint:</strong> Lodge a complaint with the relevant supervisory authority (in the UK: the Information Commissioner's Office at ico.org.uk).</li>
         </ul>
-        <p>To exercise any of these rights, contact us at <a href="mailto:media@jobsagent247.com" className="underline" style={{ color: '#8B5CF6' }}>media@jobsagent247.com</a>.</p>
+        <p>To exercise any of these rights, contact us at <a href="mailto:media@jobagent247.co" className="underline" style={{ color: '#8B5CF6' }}>media@jobagent247.co</a>.</p>
       </Section>
 
       <Section title="9. Cookies and Tracking">
@@ -109,7 +109,7 @@ export default function PrivacyPage() {
       </Section>
 
       <Section title="10. Security">
-        <p>We implement appropriate technical and organisational measures to protect your personal data against unauthorised access, loss, or disclosure. No system is completely secure, and we cannot guarantee absolute security. If you become aware of a security vulnerability, please report it responsibly to <a href="mailto:media@jobsagent247.com" className="underline" style={{ color: '#8B5CF6' }}>media@jobsagent247.com</a>.</p>
+        <p>We implement appropriate technical and organisational measures to protect your personal data against unauthorised access, loss, or disclosure. No system is completely secure, and we cannot guarantee absolute security. If you become aware of a security vulnerability, please report it responsibly to <a href="mailto:media@jobagent247.co" className="underline" style={{ color: '#8B5CF6' }}>media@jobagent247.co</a>.</p>
       </Section>
 
       <Section title="11. Children's Privacy">
@@ -121,7 +121,7 @@ export default function PrivacyPage() {
       </Section>
 
       <Section title="13. Contact">
-        <p>For any privacy, data, or compliance queries, contact us at: <a href="mailto:media@jobsagent247.com" className="underline" style={{ color: '#8B5CF6' }}>media@jobsagent247.com</a></p>
+        <p>For any privacy, data, or compliance queries, contact us at: <a href="mailto:media@jobagent247.co" className="underline" style={{ color: '#8B5CF6' }}>media@jobagent247.co</a></p>
       </Section>
 
     </LegalLayout>

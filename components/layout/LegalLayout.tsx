@@ -35,7 +35,7 @@ export function LegalLayout({ title, lastUpdated, children }: LegalLayoutProps) 
             <Link href="/terms" className="text-sm hover:underline" style={{ color: '#8B5CF6' }}>Terms &amp; Conditions</Link>
             <Link href="/privacy" className="text-sm hover:underline" style={{ color: '#8B5CF6' }}>Privacy Policy</Link>
             <Link href="/data-compliance" className="text-sm hover:underline" style={{ color: '#8B5CF6' }}>Data Compliance</Link>
-            <a href="mailto:media@jobsagent247.com" className="text-sm hover:underline" style={{ color: '#8B5CF6' }}>Contact</a>
+            <a href="mailto:media@jobagent247.co" className="text-sm hover:underline" style={{ color: '#8B5CF6' }}>Contact</a>
             <Link href="/" className="text-sm ml-auto" style={{ color: '#64748B' }}>← Back to home</Link>
           </div>
         </div>
