@@ -278,48 +278,35 @@
     border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
-  /* Surface classes — light-mode overrides.
-     Nav and sidebar stay dark even in light mode so the brand logo (which
-     has light-grey "Job" and "247" baked into the PNG) remains readable.
-     This is a deliberate visual-hierarchy choice — the dark anchor bars
-     frame the light content area, matching the pattern used by
-     Stripe / Linear / Vercel for the same reason. */
+  /* Surface classes — light overrides */
   .light .nav-surface {
-    background: rgba(5, 7, 13, 0.85);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(248, 250, 252, 0.85);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   .light .sidebar-surface {
-    background: rgba(5, 7, 13, 0.92);
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(248, 250, 252, 0.9);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   .light .sidebar-footer-border {
-    border-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(0, 0, 0, 0.08);
   }
 
   .light .dashboard-header-surface {
-    background: rgba(5, 7, 13, 0.85);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(248, 250, 252, 0.85);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   .light .mobile-menu-surface {
-    background: rgba(5, 7, 13, 0.98);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(248, 250, 252, 0.98);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
   }
 
-  /* When the nav/sidebar/header surfaces stay dark in light mode, re-scope
-     the foreground tokens for their children so links and labels render
-     against the dark anchor rather than the page's light tokens. */
-  .light .nav-surface,
-  .light .sidebar-surface,
-  .light .dashboard-header-surface,
-  .light .mobile-menu-surface {
-    --foreground: #F8FAFC;
-    --muted-foreground: #94A3B8;
-    --border: rgba(255, 255, 255, 0.08);
-    color: #F8FAFC;
-  }
+  /* Theme-aware logo: show dark logo by default, light logo under .light */
+  .logo-light { display: none; }
+  .light .logo-dark { display: none; }
+  .light .logo-light { display: inline-block; }
 
   /* ThemeToggle button */
   .theme-toggle-btn {

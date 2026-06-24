@@ -30,10 +30,18 @@ export function Navbar() {
             <Image
               src="/jobagent-logo.png"
               alt="JobAgent247"
-              width={184}
-              height={72}
+              width={368}
+              height={144}
               priority
-              className="h-12 w-auto md:h-14"
+              className="logo-dark h-24 w-auto md:h-28"
+            />
+            <Image
+              src="/jobagent-logo-light.png"
+              alt="JobAgent247"
+              width={368}
+              height={144}
+              priority
+              className="logo-light h-24 w-auto md:h-28"
             />
           </Link>
 

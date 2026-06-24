@@ -511,9 +511,16 @@ function Footer() {
           <Image
             src="/jobagent-logo.png"
             alt="JobAgent247"
-            width={154}
-            height={60}
-            className="h-12 w-auto"
+            width={308}
+            height={120}
+            className="logo-dark h-24 w-auto"
+          />
+          <Image
+            src="/jobagent-logo-light.png"
+            alt="JobAgent247"
+            width={308}
+            height={120}
+            className="logo-light h-24 w-auto"
           />
           <div className="flex flex-wrap justify-center gap-6">
             {['Product', 'How it Works', 'Features', 'Pricing', 'FAQ'].map((link) => (
