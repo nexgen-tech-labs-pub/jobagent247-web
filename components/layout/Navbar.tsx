@@ -25,7 +25,7 @@ export function Navbar() {
       style={{ backdropFilter: 'blur(20px)' }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-28">
           <Link href="/" className="inline-flex items-center" aria-label="JobAgent247 home">
             <Image
               src="/jobagent-logo-dark.png"
@@ -33,7 +33,7 @@ export function Navbar() {
               width={896}
               height={450}
               priority
-              className="logo-dark h-9 w-auto md:h-10"
+              className="logo-dark h-16 w-auto md:h-20"
             />
             <Image
               src="/jobagent-logo-light.png"
@@ -41,7 +41,7 @@ export function Navbar() {
               width={677}
               height={400}
               priority
-              className="logo-light h-9 w-auto md:h-10"
+              className="logo-light h-16 w-auto md:h-20"
             />
           </Link>
 

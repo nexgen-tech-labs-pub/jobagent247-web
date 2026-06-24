@@ -280,7 +280,7 @@
 
   /* Surface classes — light overrides */
   .light .nav-surface {
-    background: rgba(248, 250, 252, 0.85);
+    background: #FFFFFF;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   }
 
