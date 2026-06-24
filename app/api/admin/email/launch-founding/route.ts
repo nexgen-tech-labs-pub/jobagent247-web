@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/nextjs'
 import { render } from '@react-email/render'
 import { createAdminClient } from '@/lib/supabase'
 import { getResend, EMAIL_FROM, EMAIL_REPLY_TO } from '@/lib/email'
-import { FoundingMemberLaunch } from '@/emails/FoundingMemberLaunch'
+import { FoundingMemberLaunch } from '@/lib/emails/FoundingMemberLaunch'
 
 const logger = console
 const CAMPAIGN = 'founding-member-launch-v1'

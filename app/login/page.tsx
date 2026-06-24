@@ -81,8 +81,9 @@ function LoginForm() {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#94A3B8' }}>Email</label>
+            <label htmlFor="login-email" className="block text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#94A3B8' }}>Email</label>
             <input
+              id="login-email"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
@@ -96,13 +97,14 @@ function LoginForm() {
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-semibold uppercase tracking-wide" style={{ color: '#94A3B8' }}>Password</label>
+              <label htmlFor="login-password" className="block text-xs font-semibold uppercase tracking-wide" style={{ color: '#94A3B8' }}>Password</label>
               <Link href="/forgot-password" className="text-xs transition-colors" style={{ color: '#8B5CF6' }}>
                 Forgot password?
               </Link>
             </div>
             <div className="relative">
               <input
+                id="login-password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={e => setPassword(e.target.value)}

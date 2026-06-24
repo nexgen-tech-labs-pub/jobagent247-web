@@ -112,8 +112,9 @@ export default function SignupPage() {
 
         <form onSubmit={handleSignup} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#94A3B8' }}>Email</label>
+            <label htmlFor="signup-email" className="block text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#94A3B8' }}>Email</label>
             <input
+              id="signup-email"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
@@ -126,9 +127,10 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#94A3B8' }}>Password</label>
+            <label htmlFor="signup-password" className="block text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#94A3B8' }}>Password</label>
             <div className="relative">
               <input
+                id="signup-password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
