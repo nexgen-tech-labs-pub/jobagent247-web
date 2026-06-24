@@ -35,21 +35,71 @@ export default function ProfilePage() {
   const [tagInput, setTagInput] = useState('')
   const [error, setError] = useState<string | null>(null)
 
+  const [agentRunning, setAgentRunning] = useState(false)
+  const [agentError, setAgentError] = useState<string | null>(null)
+  const [agentResult, setAgentResult] = useState<{
+    topSkills: string[]
+    experienceLevel: string
+    preferredDomains: string[]
+    yearsExperience: number | null
+  } | null>(null)
+
+  const runProfileAgent = async () => {
+    setAgentRunning(true)
+    setAgentError(null)
+    setAgentResult(null)
+    try {
+      const res = await fetch('/api/profile/extract-skills', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Profile Agent failed')
+      setAgentResult(data)
+    } catch (err) {
+      setAgentError(err instanceof Error ? err.message : 'Profile Agent failed')
+    } finally {
+      setAgentRunning(false)
+    }
+  }
+
+  const acceptSuggestedSkills = () => {
+    if (!agentResult || !profile) return
+    const existing = profile.keywords ?? []
+    const next = Array.from(new Set([...existing, ...agentResult.topSkills.map(s => s.toLowerCase())]))
+    setProfile(p => p ? { ...p, keywords: next } : p)
+    save({ keywords: next })
+    setAgentResult(null)
+  }
+
   useEffect(() => {
     const supabase = getBrowserClient()
-    supabase.auth.getUser().then((res: Awaited<ReturnType<typeof supabase.auth.getUser>>) => {
-      if (res.data.user) setUserId(res.data.user.id)
-    })
-    fetch('/api/profile')
-      .then(async r => {
-        if (!r.ok) {
-          const body = await r.json().catch(() => ({ error: `HTTP ${r.status}` }))
-          throw new Error(body.error ?? `HTTP ${r.status}`)
+    ;(async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          setUserId(user.id)
+          // Load existing CVs from the DB — previously this state was only
+          // populated by an in-session upload, so refreshing the page made
+          // any previously-uploaded CV "vanish" and profile strength drop.
+          const { data: cvRows } = await supabase
+            .from('cvs')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+          if (cvRows) setCVs(cvRows as CV[])
         }
-        return r.json()
-      })
-      .then((data: User) => { setProfile(data); setLoading(false) })
-      .catch((err: Error) => { setError(err.message); setLoading(false) })
+
+        const res = await fetch('/api/profile')
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+          throw new Error(body.error ?? `HTTP ${res.status}`)
+        }
+        const data: User = await res.json()
+        setProfile(data)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load profile')
+      } finally {
+        setLoading(false)
+      }
+    })()
   }, [])
 
   const save = async (updates: Partial<User>) => {
@@ -288,9 +338,85 @@ export default function ProfilePage() {
           )}
         </GlassCard>
 
-        <GradientButton size="lg" className="w-full justify-center" onClick={() => {}}>
-          <Zap className="w-4 h-4" /> Run Profile Agent
+        <GradientButton
+          size="lg"
+          className="w-full justify-center"
+          onClick={runProfileAgent}
+          disabled={agentRunning || cvs.length === 0}
+        >
+          {agentRunning
+            ? <><Loader2 className="w-4 h-4 animate-spin" /> Reading your CV…</>
+            : <><Zap className="w-4 h-4" /> Run Profile Agent</>}
         </GradientButton>
+
+        {cvs.length === 0 && (
+          <p className="text-xs text-center" style={{ color: '#64748B' }}>
+            Upload a CV above to enable the Profile Agent.
+          </p>
+        )}
+
+        {agentError && (
+          <p className="text-sm px-4 py-3 rounded-xl"
+            style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' }}>
+            {agentError}
+          </p>
+        )}
+
+        {agentResult && (
+          <GlassCard className="p-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-heading font-semibold text-white">Profile Agent suggestions</h3>
+              <button
+                onClick={() => setAgentResult(null)}
+                className="text-xs px-2 py-1 rounded-full hover:opacity-80"
+                style={{ background: 'rgba(255,255,255,0.05)', color: '#94A3B8', border: '1px solid rgba(255,255,255,0.08)' }}
+              >
+                Dismiss
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+              <div className="p-3 rounded-xl" style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)' }}>
+                <p className="text-xs mb-1" style={{ color: '#94A3B8' }}>Seniority</p>
+                <p className="text-white font-medium capitalize">{agentResult.experienceLevel}</p>
+              </div>
+              <div className="p-3 rounded-xl" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
+                <p className="text-xs mb-1" style={{ color: '#94A3B8' }}>Years of experience</p>
+                <p className="text-white font-medium">{agentResult.yearsExperience ?? '—'}</p>
+              </div>
+            </div>
+
+            {agentResult.preferredDomains.length > 0 && (
+              <div className="mb-4">
+                <p className="text-xs mb-2" style={{ color: '#94A3B8' }}>Domains detected</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {agentResult.preferredDomains.map(d => (
+                    <span key={d} className="text-xs px-2.5 py-1 rounded-full capitalize"
+                      style={{ background: 'rgba(139,92,246,0.12)', color: '#A78BFA', border: '1px solid rgba(139,92,246,0.25)' }}>
+                      {d}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <p className="text-xs mb-2" style={{ color: '#94A3B8' }}>
+              Suggested keywords ({agentResult.topSkills.length})
+            </p>
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {agentResult.topSkills.map(s => (
+                <span key={s} className="text-xs px-2.5 py-1 rounded-full"
+                  style={{ background: 'rgba(34,197,94,0.10)', color: '#86EFAC', border: '1px solid rgba(34,197,94,0.25)' }}>
+                  {s}
+                </span>
+              ))}
+            </div>
+
+            <GradientButton size="sm" className="w-full justify-center" onClick={acceptSuggestedSkills} disabled={saving}>
+              {saving ? 'Saving…' : 'Add these to my keywords'}
+            </GradientButton>
+          </GlassCard>
+        )}
 
       </div>
     </DashboardLayout>
