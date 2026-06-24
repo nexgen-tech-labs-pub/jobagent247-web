@@ -28,20 +28,20 @@ export function Navbar() {
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="inline-flex items-center" aria-label="JobAgent247 home">
             <Image
-              src="/jobagent-logo.png"
+              src="/jobagent-logo-dark.png"
               alt="JobAgent247"
-              width={368}
-              height={144}
+              width={896}
+              height={450}
               priority
-              className="logo-dark h-24 w-auto md:h-28"
+              className="logo-dark h-9 w-auto md:h-10"
             />
             <Image
               src="/jobagent-logo-light.png"
               alt="JobAgent247"
-              width={368}
-              height={144}
+              width={677}
+              height={400}
               priority
-              className="logo-light h-24 w-auto md:h-28"
+              className="logo-light h-9 w-auto md:h-10"
             />
           </Link>
 

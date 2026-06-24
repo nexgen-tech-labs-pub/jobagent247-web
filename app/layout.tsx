@@ -59,7 +59,7 @@ export default function RootLayout({
             name: 'JobAgent247',
             alternateName: 'Job Agent 247',
             url: 'https://jobagent247.co',
-            logo: 'https://jobagent247.co/jobagent-logo.png',
+            logo: 'https://jobagent247.co/jobagent-logo-dark.png',
             description:
               'AI-powered job-search platform. Ten specialised agents score and rewrite CVs against any job description, find matching live jobs from 50+ UK and Indian job sites, draft tailored cover letters, and prepare you for interviews.',
             sameAs: ['https://jobagent247.co/in'],
