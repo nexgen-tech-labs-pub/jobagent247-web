@@ -2,9 +2,10 @@ import { randomUUID } from 'crypto'
 import { triggerScrapingJob } from '@/lib/scraper'
 import { createServerClient } from '@/lib/supabase'
 import type { JobSourceAdapter, JobSearchRequest, JobSearchRun, PollResult } from './types'
+import { UK_SCRAPER_SITES, INDIA_SCRAPER_SITES } from './sites'
 
-const UK_SITES = ['jobserve.com', 'adzuna.co.uk', 'cv-library.co.uk', 'cwjobs.co.uk', 'reed.co.uk', 'uk.indeed.com']
-const INDIA_SITES = ['naukri.com', 'foundit.in', 'jooble.org', 'shine.com', 'timesjobs.com']
+const UK_SITES = UK_SCRAPER_SITES
+const INDIA_SITES = INDIA_SCRAPER_SITES
 
 async function pollCloudRunJob(runId: string): Promise<PollResult> {
   const scrapeJobId = runId.replace(/^cloudrun::/, '')
@@ -32,7 +33,7 @@ export const CloudRunUKAdapter: JobSourceAdapter = {
       locale: 'uk',
       job_type: req.remoteOnly ? 'remote' : '',
       visa_required: false,
-      sites: UK_SITES,
+      sites: [...UK_SITES],
     })
     return [{ runId: `cloudrun::${scrapeJobId}`, source: 'UK Job Boards' }]
   },
@@ -51,7 +52,7 @@ export const CloudRunIndiaAdapter: JobSourceAdapter = {
       locale: 'in',
       job_type: req.remoteOnly ? 'remote' : '',
       visa_required: false,
-      sites: INDIA_SITES,
+      sites: [...INDIA_SITES],
     })
     return [{ runId: `cloudrun::${scrapeJobId}`, source: 'India Job Boards' }]
   },

@@ -3,6 +3,7 @@ import { Redis } from '@upstash/redis'
 import { createServerClient } from '@/lib/supabase'
 import { extractProfileSkills } from '@/lib/claude'
 import { sortJobsByRelevance } from '@/lib/profile-matching'
+import { sitesForLocale } from '@/lib/job-sources/sites'
 import type { Job } from '@/lib/types/database'
 
 const logger = console  // swap for Sentry logger in Phase 5
@@ -49,7 +50,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ jobs, total: jobs.length, page: 1 })
   }
 
-  const cacheKey = `jobs:search:${user.id}:${keywords}:${location}:${type}:${visa}:${minScore}:${page}:${limit}`
+  // Resolve user locale once so search results stay scoped to UK or India
+  // boards. Without this, an Indian user querying without an explicit
+  // location string sees every UK row that matches their keywords.
+  const { data: profileRow } = await supabase
+    .from('users')
+    .select('locale')
+    .eq('id', user.id)
+    .maybeSingle()
+  const locale = (profileRow?.locale === 'in' ? 'in' : 'uk') as 'uk' | 'in'
+  const allowedSites = sitesForLocale(locale)
+
+  const cacheKey = `jobs:search:${user.id}:${locale}:${keywords}:${location}:${type}:${visa}:${minScore}:${page}:${limit}`
   try {
     const cached = await getRedis().get(cacheKey)
     if (cached) return NextResponse.json(cached)
@@ -60,6 +72,7 @@ export async function GET(request: NextRequest) {
   let query = supabase
     .from('jobs')
     .select('*, user_jobs!left(id, match_score, status)', { count: 'exact' })
+    .in('source_site', allowedSites as unknown as string[])
     .range(offset, offset + limit - 1)
     .order('posted_date', { ascending: false, nullsFirst: false })
     .order('scraped_at', { ascending: false })
