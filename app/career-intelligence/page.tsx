@@ -552,7 +552,7 @@ export default function CareerIntelligencePage() {
                   value={targetSeniority}
                   onChange={e => setTargetSeniority(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-xl text-sm text-white outline-none"
-                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', colorScheme: 'dark' }}>
                   <option value="">Any</option>
                   {SENIORITY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
@@ -565,7 +565,7 @@ export default function CareerIntelligencePage() {
                   value={targetGeography}
                   onChange={e => setTargetGeography(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-xl text-sm text-white outline-none"
-                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', colorScheme: 'dark' }}>
                   <option value="">Any</option>
                   {GEOGRAPHY_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
                 </select>

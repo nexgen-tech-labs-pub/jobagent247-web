@@ -57,11 +57,10 @@ export async function POST(request: NextRequest) {
       const result = await mammoth.extractRawText({ buffer })
       rawText = result.value.trim()
     } else {
-      const { createRequire } = await import('module')
-      const req = createRequire(import.meta.url)
-      const pdfParse = req('pdf-parse') as (buf: Buffer) => Promise<{ text: string }>
-      const result = await pdfParse(buffer)
-      rawText = result.text.trim()
+      const { extractText, getDocumentProxy } = await import('unpdf')
+      const pdf = await getDocumentProxy(new Uint8Array(buffer))
+      const { text } = await extractText(pdf, { mergePages: true })
+      rawText = (Array.isArray(text) ? text.join('\n') : text).trim()
     }
 
     // Determine if this is the user's first CV
