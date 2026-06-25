@@ -21,7 +21,7 @@ import {
 } from 'lucide-react'
 import { getBrowserClient } from '@/lib/supabase-browser'
 
-const navItems = [
+const navItems: { label: string; href: string; icon: typeof LayoutDashboard; comingSoon?: boolean }[] = [
   { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
   { label: 'My Profile', href: '/profile', icon: User },
   { label: 'CV Agent', href: '/cv-agent', icon: FileText },
@@ -31,7 +31,7 @@ const navItems = [
   { label: 'Growth Coach', href: '/career-growth', icon: TrendingUp },
   { label: 'Evidence Builder', href: '/evidence-builder', icon: BookOpen },
   { label: 'Applications', href: '/applications', icon: CheckSquare },
-  { label: 'Follow-Ups', href: '/follow-ups', icon: Inbox },
+  { label: 'Follow-Ups', href: '/follow-ups', icon: Inbox, comingSoon: true },
   { label: 'Interview Prep', href: '/interview-prep', icon: MessageSquare },
   { label: 'Settings', href: '/settings', icon: Settings },
 ]
@@ -82,6 +82,25 @@ export function Sidebar() {
         {navItems.map((item) => {
           const Icon = item.icon
           const active = pathname === item.href
+          if (item.comingSoon) {
+            return (
+              <div
+                key={item.href}
+                aria-disabled="true"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium cursor-not-allowed select-none"
+                style={{ color: 'rgba(148, 163, 184, 0.5)', border: '1px solid transparent' }}
+              >
+                <Icon className="w-4 h-4 shrink-0" />
+                <span className="flex-1">{item.label}</span>
+                <span
+                  className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-md"
+                  style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#A78BFA', border: '1px solid rgba(139, 92, 246, 0.25)' }}
+                >
+                  Soon
+                </span>
+              </div>
+            )
+          }
           return (
             <Link
               key={item.href}

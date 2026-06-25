@@ -63,7 +63,9 @@ export async function getAnalysisById(
     .eq('id', analysisId)
     .eq('user_id', userId)
     .single()
-  return data as JobFitAnalysisWithJob | null
+  const row = data as (Omit<JobFitAnalysisWithJob, 'saved_job'> & { saved_job: JobFitAnalysisWithJob['saved_job'] | null }) | null
+  if (!row || row.saved_job == null) return null
+  return row as JobFitAnalysisWithJob
 }
 
 export async function listAnalysesForUser(

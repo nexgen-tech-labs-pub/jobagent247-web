@@ -81,6 +81,14 @@ function FitResultView({
   const [feedbackSent, setFeedbackSent] = useState(false)
   const cat = categoryColor(analysis.match_category)
   const job = analysis.saved_job
+  if (!job) {
+    return (
+      <div className="text-center py-16" style={{ color: '#64748B' }}>
+        <p className="text-sm mb-4">This analysis is missing its source job. It may have been deleted.</p>
+        <SecondaryButton size="sm" onClick={onBack}>Back to analyses</SecondaryButton>
+      </div>
+    )
+  }
 
   const handleFeedback = async (uf: UserFeedback, ao: ApplicationOutcome) => {
     await fetch(`/api/jobs/fit/${analysis.id}/feedback`, {
@@ -312,7 +320,7 @@ function AnalysisList({
         <h2 className="font-heading font-semibold text-white">Saved Analyses ({analyses.length})</h2>
         <GradientButton size="sm" onClick={onNew}>+ New Analysis</GradientButton>
       </div>
-      {analyses.map(a => {
+      {analyses.filter(a => a.saved_job).map(a => {
         const cat = categoryColor(a.match_category)
         return (
           <button key={a.id} onClick={() => onSelect(a)} className="w-full text-left">
