@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import { HelpChat } from "@/components/help/HelpChat";
+import { Analytics } from "@vercel/analytics/next";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -79,6 +80,7 @@ export default function RootLayout({
           {children}
           <HelpChat />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
