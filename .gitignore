@@ -59,3 +59,6 @@ AGENTS.md
 .playwright/
 playwright-report/
 test-results/
+*.pyc
+__pycache__/
+__pycache__/*.pyc

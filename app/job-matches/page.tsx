@@ -11,7 +11,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge'
 import {
   MapPin, Building2, Banknote, FileText, ExternalLink,
   Search, Loader2, RefreshCw, ChevronLeft, ChevronRight,
-  BarChart2, X,
+  BarChart2, X, Info,
 } from 'lucide-react'
 
 const PAGE_SIZE = 10
@@ -149,32 +149,38 @@ export default function JobMatchesPage() {
     const { runs } = await res.json() as { runs: { runId: string; source: string }[] }
     pendingRunsRef.current = [...runs]
 
+    const totalRuns = runs.length
+    let failedCount = 0
+    let doneCount = 0
+
     pollRef.current = setInterval(async () => {
       const remaining: { runId: string; source: string }[] = []
-      let anyFailed = false
 
       for (const run of pendingRunsRef.current) {
         const poll = await fetch(`/api/jobs/fetch/${run.runId}?source=${encodeURIComponent(run.source)}`).catch(() => null)
         if (!poll?.ok) { remaining.push(run); continue }
         const { status } = await poll.json() as { status: 'running' | 'done' | 'failed' }
         if (status === 'running') remaining.push(run)
-        if (status === 'failed') anyFailed = true
+        if (status === 'failed') failedCount++
+        if (status === 'done') doneCount++
       }
 
       pendingRunsRef.current = remaining
+      if (remaining.length > 0) return
 
-      if (anyFailed && remaining.length === 0) {
-        stopPolling()
+      stopPolling()
+
+      // Only call the whole job a "failure" when EVERY source failed. If one
+      // source succeeded (even with zero results), refresh the list and let
+      // the user fall back to the empty-state CTA toward Job Fit / CV Agent.
+      if (doneCount === 0 && failedCount === totalRuns) {
         setFetchStatus('failed')
-        setFetchError('Job search failed. Please try again.')
+        setFetchError('Some sources are temporarily unavailable. Try again in a moment, or paste a JD into Job Fit / CV Agent to analyse any role.')
         return
       }
 
-      if (remaining.length === 0) {
-        stopPolling()
-        setFetchStatus('done')
-        await loadJobs(keywordRef.current, typeFilterRef.current, 1)
-      }
+      setFetchStatus('done')
+      await loadJobs(keywordRef.current, typeFilterRef.current, 1)
     }, 5000)
   }
 
@@ -205,6 +211,26 @@ export default function JobMatchesPage() {
 
   return (
     <DashboardLayout title="Job Matches">
+      {/* Supplementary-search advisory */}
+      <div
+        className="flex items-start gap-3 p-4 mb-4 rounded-xl"
+        style={{
+          background: 'rgba(139, 92, 246, 0.08)',
+          border: '1px solid rgba(139, 92, 246, 0.22)',
+        }}
+      >
+        <Info className="w-4 h-4 mt-0.5 shrink-0" style={{ color: '#A78BFA' }} />
+        <div className="text-sm" style={{ color: '#CBD5E1' }}>
+          <span className="font-medium text-white">Job Search is a complimentary index.</span>{' '}
+          We pull a sample from public boards to help you discover roles fast. If you don&apos;t
+          see what you want here, paste any job description into{' '}
+          <Link href="/job-fit" className="underline" style={{ color: '#A78BFA' }}>Job Fit</Link>
+          {' '}or{' '}
+          <Link href="/cv-agent" className="underline" style={{ color: '#A78BFA' }}>CV Agent</Link>
+          {' '}— every agent works on any role, not just the ones in this list.
+        </div>
+      </div>
+
       {/* Filters + Find Jobs */}
       <GlassCard className="p-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-3">
@@ -262,12 +288,20 @@ export default function JobMatchesPage() {
       )}
 
       {!loading && jobs.length === 0 && (
-        <div className="text-center py-16" style={{ color: '#64748B' }}>
+        <div className="text-center py-16 px-6" style={{ color: '#64748B' }}>
           <Search className="w-10 h-10 mx-auto mb-3 opacity-40" />
-          <p className="text-sm mb-4">No jobs found yet.</p>
-          <GradientButton size="sm" onClick={startFetch} disabled={isFetching}>
-            {isFetching ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Finding…</> : 'Find Jobs Now'}
-          </GradientButton>
+          <p className="text-sm mb-2 text-white font-medium">No jobs in our index match that yet.</p>
+          <p className="text-xs max-w-md mx-auto mb-5">
+            Our scraper samples a slice of UK and India boards — it won&apos;t cover every listing.
+            You can still analyse <strong>any</strong> role by pasting its description below.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <GradientButton size="sm" onClick={startFetch} disabled={isFetching}>
+              {isFetching ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Finding…</> : <><RefreshCw className="w-3.5 h-3.5" /> Refresh index</>}
+            </GradientButton>
+            <SecondaryButton size="sm" href="/job-fit">Paste a JD → Job Fit</SecondaryButton>
+            <SecondaryButton size="sm" href="/cv-agent">Tailor my CV →</SecondaryButton>
+          </div>
         </div>
       )}
 
