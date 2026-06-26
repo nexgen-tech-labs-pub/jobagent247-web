@@ -1,6 +1,7 @@
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { RecentDocuments } from '@/components/dashboard/RecentDocuments'
 import { FoundingMemberBanner } from '@/components/dashboard/FoundingMemberBanner'
+import { FoundingClaimCard } from '@/components/dashboard/FoundingClaimCard'
 import { FreeTierBanner } from '@/components/billing/FreeTierBanner'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { GradientButton } from '@/components/ui/GradientButton'
@@ -88,8 +89,9 @@ export default async function DashboardPage() {
           <FoundingMemberBanner trialEndsAt={trialEndsAt} />
         </div>
       ) : plan === 'free' ? (
-        <div className="mb-6">
+        <div className="mb-6 space-y-4">
           <FreeTierBanner plan={plan} locale={locale} />
+          <FoundingClaimCard />
         </div>
       ) : null}
       <div className="mb-8">

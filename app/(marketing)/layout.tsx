@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://jobagent247.co'),
-  title: 'JobAgent247 — AI Job Search Tool UK | CV Builder & Interview Prep',
+  title: 'JobAgent247 — Your 24x7 Job Search Assistant | CV Builder & Interview Prep',
   description: 'UK\'s AI job search platform. Build a stronger CV, match roles on LinkedIn and Indeed, generate tailored cover letters, and prepare for interviews.',
   keywords: [
     'AI job search tool UK',
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     'AI career tools UK',
   ],
   openGraph: {
-    title: 'JobAgent247 — AI Job Search Tool UK',
+    title: 'JobAgent247 — Your 24x7 Job Search Assistant',
     description: 'Get more interviews with your AI job search agents.',
     type: 'website',
     locale: 'en_GB',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'JobAgent247 — AI Job Search Tool UK',
+    title: 'JobAgent247 — Your 24x7 Job Search Assistant',
     description: 'Get more interviews with your AI job search agents.',
     site: '@jobagent247',
   },

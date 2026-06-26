@@ -29,7 +29,7 @@ function HeroSection() {
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
             <span className="inline-block px-3 py-1 text-xs font-semibold uppercase tracking-widest rounded-full mb-6"
               style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#8B5CF6', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
-              AI Job Search Tool — India
+              Your 24x7 Job Search Assistant
             </span>
             <h1 className="font-heading font-bold text-5xl lg:text-6xl xl:text-7xl text-white leading-[1.1] mb-6">
               Get more interviews with your{' '}

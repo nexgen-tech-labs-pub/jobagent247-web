@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://jobagent247.co'),
-  title: 'JobAgent247 — AI Job Search Tool India | Resume Builder & Interview Prep',
+  title: 'JobAgent247 — Your 24x7 Job Search Assistant | Resume Builder & Interview Prep',
   description: 'India\'s AI job search platform. Build a stronger resume, match jobs on Naukri and LinkedIn, generate cover letters, and prepare for interviews.',
   keywords: [
     'AI job search tool India',
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     'cover letter generator India',
   ],
   openGraph: {
-    title: 'JobAgent247 — AI Job Search Tool India',
+    title: 'JobAgent247 — Your 24x7 Job Search Assistant',
     description: 'Build stronger resumes, match jobs, and prepare for interviews with AI agents.',
     type: 'website',
     locale: 'en_IN',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'JobAgent247 — AI Job Search Tool India',
+    title: 'JobAgent247 — Your 24x7 Job Search Assistant',
     description: 'Build stronger resumes, match jobs, and prepare for interviews with AI agents.',
     site: '@jobagent247',
   },
