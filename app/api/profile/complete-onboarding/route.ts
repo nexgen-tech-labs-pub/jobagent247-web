@@ -9,12 +9,12 @@ export async function POST() {
 
   await updateUser(supabase, authUser.id, { onboarding_complete: true })
 
-  // Claim a founding spot (first 100 users get 30-day Pro free)
-  const { data: claimed } = await supabase.rpc('claim_founding_spot', { p_user_id: authUser.id })
-
+  // Founding-member trial is no longer auto-granted. New users stay on Free
+  // until an admin invokes claim_founding_spot() manually in SQL, or until a
+  // Stripe subscription event upgrades them via the billing webhook.
   return NextResponse.json({
     success: true,
-    foundingMember: claimed === true,
+    foundingMember: false,
     structuredProfile: {
       skills: [],
       experienceYears: 0,

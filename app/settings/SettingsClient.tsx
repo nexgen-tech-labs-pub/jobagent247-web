@@ -50,16 +50,30 @@ export function SettingsClient({ name, email, location, plan, locale, stripeCust
   }
 
   const handlePortal = async () => {
+    // Open a placeholder tab synchronously in the click handler so the
+    // browser doesn't block it as a popup. We swap the URL once Stripe
+    // returns the session. If the browser still blocks it (returns null),
+    // we fall back to same-tab navigation — Stripe's return_url brings
+    // the user back to /settings?tab=plan either way.
+    const newTab = typeof window !== 'undefined'
+      ? window.open('about:blank', '_blank', 'noopener,noreferrer')
+      : null
+
     setPortalLoading(true)
     setPortalError(null)
     try {
       const res = await fetch('/api/billing/portal', { method: 'POST' })
       const data = await res.json() as { url?: string; error?: string }
-      if (!res.ok || data.error) throw new Error(data.error ?? 'Could not open billing portal')
-      if (data.url) {
+      if (!res.ok || data.error || !data.url) {
+        throw new Error(data.error ?? 'Could not open billing portal')
+      }
+      if (newTab) {
+        newTab.location.href = data.url
+      } else {
         window.location.href = data.url
       }
     } catch (err) {
+      if (newTab) newTab.close()
       setPortalError(err instanceof Error ? err.message : 'Could not open billing portal')
     } finally {
       setPortalLoading(false)
