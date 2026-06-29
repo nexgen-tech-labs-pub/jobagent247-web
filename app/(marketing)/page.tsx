@@ -14,6 +14,7 @@ import { GradientButton } from '@/components/ui/GradientButton'
 import { SecondaryButton } from '@/components/ui/SecondaryButton'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { HomeJsonLd } from '@/components/marketing/HomeJsonLd'
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
@@ -36,8 +37,9 @@ function HeroSection() {
               <span className="gradient-text">personal AI agents.</span>
             </h1>
             <p className="text-lg leading-relaxed mb-8" style={{ color: '#CBD5E1' }}>
-              Create stronger CVs, match with better roles, generate tailored applications, prepare for interviews,
-              and track your entire job search from one intelligent workspace.
+              JobAgent247 runs 10+ specialised AI agents that score and rewrite your CV against any job description —
+              targeting a 90+ ATS score — match live roles from 50+ UK and Indian job sites, generate tailored
+              applications, prepare you for interviews, and track your entire job search from one intelligent workspace.
             </p>
             <ul className="space-y-3 mb-10">
               {['Tailored CV and cover letter generation', 'Job match scoring and gap analysis', 'Interview prep based on each role', 'Application tracker and follow-up reminders'].map((item) => (
@@ -534,6 +536,7 @@ function Footer() {
           <Link href="/terms" className="text-xs hover:underline" style={{ color: '#64748B' }}>Terms &amp; Conditions</Link>
           <Link href="/privacy" className="text-xs hover:underline" style={{ color: '#64748B' }}>Privacy Policy</Link>
           <Link href="/data-compliance" className="text-xs hover:underline" style={{ color: '#64748B' }}>Data Compliance</Link>
+          <Link href="/editorial-policy" className="text-xs hover:underline" style={{ color: '#64748B' }}>Editorial &amp; Corrections</Link>
           <a href="mailto:media@jobagent247.co" className="text-xs hover:underline" style={{ color: '#64748B' }}>Contact</a>
           <span className="text-xs" style={{ color: '#334155' }}>Registered in the United Kingdom</span>
         </div>
@@ -547,6 +550,7 @@ function Footer() {
 export default function HomePage() {
   return (
     <main>
+      <HomeJsonLd />
       <Navbar />
       <HeroSection />
       <MetricStrip />
