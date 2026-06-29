@@ -10,13 +10,7 @@ import { Progress } from '@/components/ui/progress'
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase'
 import { FileText, MessageSquare, Bell, ArrowRight } from 'lucide-react'
-
-const ACTION_HREFS: Record<string, string> = {
-  '1': '/profile',
-  '2': '/profile',
-  '3': '/job-matches',
-  '4': '/follow-ups',
-}
+import { buildSuggestedActions, countFollowUpsDue } from '@/lib/notifications'
 import type { Job } from '@/lib/types/database'
 
 const actionIcons: Record<string, React.ElementType> = { FileText, MessageSquare, Bell }
@@ -48,14 +42,14 @@ async function getDashboardData() {
   const jobMatchAverage = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0
   const applicationsThisWeek = userJobs.filter(j => j.status === 'applied' && j.applied_at && j.applied_at >= weekAgo).length
   const interviewsScheduled = userJobs.filter(j => j.status === 'interviewing').length
-  const followUpsDue = userJobs.filter(j => j.follow_up_date && j.follow_up_date <= today).length
+  const followUpsDue = countFollowUpsDue(userJobs, today)
 
-  const suggestedActions = [
-    cvCount === 0 && { id: '1', icon: 'FileText', title: 'Upload your CV', subtitle: 'Required to use all AI agents', priority: 'high' },
-    !profile?.current_role && { id: '2', icon: 'Bell', title: 'Complete your profile', subtitle: 'Add your current role and target preferences', priority: 'high' },
-    userJobs.length === 0 && { id: '3', icon: 'MessageSquare', title: 'Find matching jobs', subtitle: 'Run a job search to see live matches', priority: 'medium' },
-    followUpsDue > 0 && { id: '4', icon: 'Bell', title: `${followUpsDue} follow-up${followUpsDue > 1 ? 's' : ''} due`, subtitle: 'Check your applications tracker', priority: 'high' },
-  ].filter(Boolean) as Array<{ id: string; icon: string; title: string; subtitle: string; priority: string }>
+  const suggestedActions = buildSuggestedActions({
+    cvCount,
+    currentRole: profile?.current_role,
+    userJobsCount: userJobs.length,
+    followUpsDue,
+  })
 
   return {
     name: profile?.name ?? user.email?.split('@')[0] ?? 'there',
@@ -134,7 +128,7 @@ export default async function DashboardPage() {
               {suggestedActions.map(action => {
                 const Icon = actionIcons[action.icon] ?? FileText
                 return (
-                  <Link key={action.id} href={ACTION_HREFS[action.id] ?? '/dashboard'}>
+                  <Link key={action.id} href={action.href}>
                     <GlassCard hover className="p-4 flex items-center gap-4">
                       <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                         style={{ background: action.priority === 'high' ? 'rgba(139,92,246,0.15)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(139,92,246,0.2)' }}>

@@ -35,12 +35,15 @@ export async function POST(req: NextRequest) {
 
     if (body.type === 'cv') {
       const content = typeof doc.content === 'string' ? doc.content : JSON.stringify(doc.content)
-      buffer = await buildCvDocx({
-        name: (doc.title as string) ?? 'CV',
-        role: '',
-        contact: '',
-        sections: [{ title: 'Content', content }],
-      })
+      const cv = await buildCvDocx({ name: (doc.title as string) ?? 'CV', markdown: content })
+      if (cv.warnings.length > 0) {
+        Sentry.captureMessage('CV export formatting warnings', {
+          level: 'warning',
+          extra: { document_id: doc.id, warnings: cv.warnings },
+        })
+        logger.warn('[export] CV formatting warnings:', cv.warnings)
+      }
+      buffer = cv.buffer
       filename = 'cv.docx'
     } else {
       const content = typeof doc.content === 'string' ? doc.content : JSON.stringify(doc.content)

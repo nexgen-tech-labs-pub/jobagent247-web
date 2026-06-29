@@ -18,7 +18,6 @@ export interface User {
   onboarding_complete: boolean
   plan: 'free' | 'pro' | 'accelerator'
   stripe_customer_id: string | null
-  paddle_customer_id: string | null
   locale: 'uk' | 'in'
   usage_counts: Record<string, number>
   credits_balance: number
@@ -354,7 +353,6 @@ export interface CreditTransaction {
   delta: number
   feature: string | null
   description: string
-  paddle_txn_id: string | null
   created_at: string
 }
 

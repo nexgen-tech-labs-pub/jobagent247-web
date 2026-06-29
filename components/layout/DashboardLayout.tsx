@@ -1,7 +1,7 @@
 import { Sidebar } from './Sidebar'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { UserMenu } from '@/components/ui/UserMenu'
-import { Bell } from 'lucide-react'
+import { NotificationBell } from './NotificationBell'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -20,12 +20,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
           <h1 className="font-heading font-semibold text-lg text-[color:var(--foreground)]">{title}</h1>
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <button className="relative p-2 rounded-lg transition-colors"
-              style={{ color: '#94A3B8' }}>
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
-                style={{ background: '#8B5CF6' }} />
-            </button>
+            <NotificationBell />
             <UserMenu />
           </div>
         </header>

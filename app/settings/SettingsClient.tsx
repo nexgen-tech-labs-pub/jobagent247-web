@@ -103,13 +103,14 @@ export function SettingsClient({ name, email, location, plan, locale, stripeCust
             <GlassCard className="p-6 space-y-5">
               <h3 className="font-heading font-semibold text-white">Account Information</h3>
               {[
-                { label: 'Full name', value: name },
-                { label: 'Email address', value: email },
-                { label: 'Location', value: location },
+                { id: 'account-full-name', label: 'Full name', value: name },
+                { id: 'account-email', label: 'Email address', value: email },
+                { id: 'account-location', label: 'Location', value: location },
               ].map((field) => (
                 <div key={field.label}>
-                  <label className="block text-xs font-medium mb-2" style={{ color: '#94A3B8' }}>{field.label}</label>
+                  <label htmlFor={field.id} className="block text-xs font-medium mb-2" style={{ color: '#94A3B8' }}>{field.label}</label>
                   <input
+                    id={field.id}
                     type="text"
                     defaultValue={field.value}
                     className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none"

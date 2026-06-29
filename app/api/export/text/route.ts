@@ -13,11 +13,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const buffer = await buildCvDocx({
+    const { buffer } = await buildCvDocx({
       name: body.name ?? 'My CV',
-      role: '',
-      contact: '',
-      sections: [{ title: 'CV', content: body.text }],
+      markdown: body.text,
     })
 
     return new NextResponse(new Uint8Array(buffer), {
