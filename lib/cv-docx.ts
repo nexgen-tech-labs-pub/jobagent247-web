@@ -32,6 +32,25 @@ const CANONICAL_SECTIONS = [
   'additional information', 'interests', 'languages', 'references',
 ]
 
+// Vocabulary for detecting a CV section heading the model emitted without a
+// "##" marker (e.g. "Key Projects", "Notable Projects", "Technical Skills").
+// A line is treated as a heading only if every word is a section word or a
+// known qualifier — so real sentences ("Strong leadership skills.") are not.
+const SECTION_WORDS = new Set([
+  'summary', 'profile', 'objective', 'objectives', 'skills', 'skill', 'competencies', 'competency',
+  'expertise', 'experience', 'employment', 'history', 'projects', 'project', 'portfolio', 'work',
+  'achievements', 'achievement', 'accomplishments', 'accomplishment', 'certifications', 'certification',
+  'certificates', 'licenses', 'licences', 'education', 'qualifications', 'qualification', 'training',
+  'development', 'coursework', 'awards', 'award', 'honors', 'honours', 'publications', 'volunteering',
+  'volunteer', 'interests', 'hobbies', 'languages', 'language', 'references', 'affiliations',
+  'memberships', 'activities', 'leadership', 'highlights', 'strengths', 'information', 'contact',
+  'deliverables', 'deliverable', 'responsibilities',
+])
+const QUALIFIER_WORDS = new Set([
+  'key', 'core', 'technical', 'professional', 'working', 'selected', 'notable', 'additional', 'other',
+  'relevant', 'personal', 'career', 'recent', 'proven', 'areas', 'area', 'and', 'of', 'the', 'my', '&',
+])
+
 const BULLET_PREFIX = /^[•‣◦⁃∙*\-–—]\s+/
 const SEPARATOR_LINE = /^[\s*_=–—-]{2,}$/
 const PLACEHOLDER_BULLET = /^(?:[-–—*•]+|n\/?a|tbd|todo|none|null)$/i
@@ -95,12 +114,30 @@ function stripHeadingMarkers(line: string): string {
 
 function isHeading(line: string): boolean {
   const t = line.trim()
+  if (!t || BULLET_PREFIX.test(t)) return false
   if (/^#{1,6}\s+\S/.test(t)) return true
+
   const bare = stripHeadingMarkers(t)
   if (!bare) return false
-  if (CANONICAL_SECTIONS.includes(bare.toLowerCase())) return true
-  // ALL CAPS short line (e.g. "CERTIFICATIONS"), letters/spaces/&/ only.
-  if (bare.length <= 40 && /^[A-Z][A-Z &/]+$/.test(bare) && /[A-Z]{3,}/.test(bare)) return true
+  const lower = bare.toLowerCase()
+  if (CANONICAL_SECTIONS.includes(lower)) return true
+
+  // Heuristic fallback for when the model omits "##": a short, title-like line
+  // that is NOT a "Label: value" line and does not end like a sentence.
+  const isLabelValue = /^[\w][\w &/()+.-]{0,34}:\s*\S/.test(t)
+  if (bare.length > 45 || /[.,;]$/.test(bare) || isLabelValue) return false
+
+  // ALL CAPS heading, e.g. "CAREER HIGHLIGHTS" / "KEY PROJECTS (2024)".
+  if (/^[A-Z0-9][A-Z0-9 &/()–-]+$/.test(bare) && /[A-Z]{3,}/.test(bare)) return true
+
+  // Title-case heading whose every word names a section or qualifies one,
+  // e.g. "Key Projects", "Notable Projects", "Selected Achievements".
+  const tokens = lower.replace(/[&/]/g, ' & ').split(/\s+/).filter(Boolean)
+  if (tokens.length <= 6 &&
+      tokens.some((w) => SECTION_WORDS.has(w)) &&
+      tokens.every((w) => SECTION_WORDS.has(w) || QUALIFIER_WORDS.has(w))) {
+    return true
+  }
   return false
 }
 

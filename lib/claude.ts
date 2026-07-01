@@ -68,6 +68,62 @@ export async function analyseCVForRole(
   return toolUse.input as CVAnalysisResult
 }
 
+const MASTER_CV_CONTRACT = `Output format contract (the text is converted directly into a professional Word .docx):
+1. Clean Markdown only. First line: candidate name. Second line: a single contact line (email | phone | location | LinkedIn) using only details present in the source CV.
+2. Every section starts with its own "## " heading, e.g. "## PROFESSIONAL SUMMARY", "## CORE TECHNICAL SKILLS", "## PROFESSIONAL EXPERIENCE", "## KEY PROJECTS", "## CERTIFICATIONS", "## EDUCATION". Never signal a section with blank lines or bold alone.
+3. Preserve every section the source CV has content for; never merge or drop one into another. If the CV has projects, output a distinct "## KEY PROJECTS" section.
+4. In CORE TECHNICAL SKILLS, group skills by category, one per line, as "**Category:** item, item".
+5. Under PROFESSIONAL EXPERIENCE, put title | company | dates on one line, then concise "- " achievement bullets beneath it.
+6. Certifications are "- " bullets of the certification name only.
+7. Never output empty bullets, placeholder bullets, separator lines, "N/A", or "TBD". Never leave a heading without content. Do not put "#"/"##" or "**" inside body text.
+
+Strict content rules:
+- Do NOT invent employers, job titles, dates, degrees, certifications, projects, achievements, salaries, or personal details.
+- Do NOT add a skill or claim experience with a tool unless it appears in the source CV.
+- Use the target role and market only to prioritise, phrase, and organise the candidate's TRUE experience — never to fabricate.
+- Use concise, achievement-focused bullets, consistent tense, and professional language. Remove duplicates and filler. Prioritise relevance to the target role.
+- This is a general master CV with no specific job description, so do NOT add a "Key Deliverables" section.`
+
+export async function generateMasterCVMarkdown(opts: {
+  cvText: string
+  targetRole: string
+  targetMarket: string
+  roleContext?: string
+  atsFeedback?: string
+}): Promise<string> {
+  const { cvText, targetRole, targetMarket, roleContext, atsFeedback } = opts
+  const roleSection = roleContext ? `\n\n${roleContext}` : ''
+  const feedbackSection = atsFeedback
+    ? `\n\nThe previous draft scored below target on ATS readiness. Address this feedback using ONLY facts already supported by the CV (truthfully incorporate any of these keywords the candidate genuinely has; do not invent): ${atsFeedback}`
+    : ''
+
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 4096,
+    system: [
+      {
+        type: 'text',
+        text: `You are JobAgent247's Default Master CV generation agent. You create a professional, recruiter-ready, ATS-friendly master CV that becomes the candidate's default CV for job applications, optimised to target a 90+ JobAgent247 ATS readiness score without ever fabricating facts.\n\n${MASTER_CV_CONTRACT}\n\nCandidate CV:\n${cvText}${roleSection}`,
+        cache_control: { type: 'ephemeral' },
+      },
+    ] as Anthropic.TextBlockParam[],
+    messages: [
+      {
+        role: 'user',
+        content: `Create the candidate's Default Master CV, optimised for their target role "${targetRole}" in the ${targetMarket} market. Follow the output format contract exactly. Output only the CV in the specified Markdown structure — no commentary, no preamble, no code fences.${feedbackSection}`,
+      },
+    ],
+  })
+
+  const text = response.content
+    .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+    .map((b) => b.text)
+    .join('')
+    .trim()
+  if (!text) throw new Error('Master CV generation returned no content')
+  return text
+}
+
 export async function* streamCVImprovement(
   cvText: string,
   jobDescription: string,
@@ -85,7 +141,9 @@ export async function* streamCVImprovement(
 
 Output format contract:
 1. Use clean Markdown only. Start with the candidate's name on the first line, then a single contact line (email | phone | location | LinkedIn).
-2. Mark every section with a level-2 heading: "## PROFESSIONAL SUMMARY", "## CORE TECHNICAL SKILLS", "## PROFESSIONAL EXPERIENCE", "## KEY PROJECTS", "## CERTIFICATIONS", "## EDUCATION". Use only the sections the candidate has data for — never output an empty section.
+2. Mark every section with a level-2 heading: "## PROFESSIONAL SUMMARY", "## CORE TECHNICAL SKILLS", "## PROFESSIONAL EXPERIENCE", "## KEY PROJECTS", "## CERTIFICATIONS", "## EDUCATION". Every section MUST start with its own "## " heading line — never rely on blank lines, bold text, or capitalisation alone to signal a section.
+2a. Preserve every section that exists in the source CV. Do not drop, merge, or silently fold one section into another. If the source CV contains projects, you MUST output a distinct "## KEY PROJECTS" section — never move project entries into PROFESSIONAL EXPERIENCE. Only omit a section if the candidate genuinely has no data for it; when in doubt, keep it.
+2b. KEY DELIVERABLES (light-touch, job-tailored): directly after "## PROFESSIONAL SUMMARY", add a "## KEY DELIVERABLES" section ONLY when the job description gives enough signal AND the candidate's CV genuinely supports it. Output 3-5 concise bullets (one line each, two at most) summarising the most relevant outcomes this candidate can credibly deliver for THIS role. Use job-description language naturally where the CV backs it up. Do NOT invent metrics, achievements, tools, or responsibilities — reuse real numbers from the CV where they exist, otherwise use concrete qualitative wording (never fabricated percentages). Avoid keyword stuffing and generic filler. Omit this section entirely if evidence is thin. If the candidate's CV already orders its sections differently, honour the candidate's existing section order and simply add KEY DELIVERABLES after the summary.
 3. In CORE TECHNICAL SKILLS, group skills by category, one per line, as "**Category:** item, item, item" (for example "**Cloud Platforms:** AWS, Azure, GCP"). Do not write dense paragraphs and do not use bullets for skill categories.
 4. For each role under PROFESSIONAL EXPERIENCE, put the job title, company and dates on one line, then achievement bullets beneath it using "- " bullets. Keep bullets concise (1-2 lines), action- and metric-focused.
 5. Certifications are bullet items ("- ") of the certification name only.

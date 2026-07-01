@@ -56,9 +56,12 @@ function CVAgentInner() {
             .single(),
         ])
         if (cvsRes.data) {
-          setCvList(cvsRes.data as CV[])
-          const primary = (cvsRes.data as CV[]).find((c) => c.is_primary) ?? (cvsRes.data as CV[])[0]
-          if (primary) setSelectedCvId(primary.id)
+          const cvs = cvsRes.data as CV[]
+          setCvList(cvs)
+          // Prefer the user's Default Master CV, then their primary upload.
+          const preferred = cvs.find((c) => c.is_default && c.generation_status === 'ready')
+            ?? cvs.find((c) => c.is_primary) ?? cvs[0]
+          if (preferred) setSelectedCvId(preferred.id)
         }
         if (profileRes.data) {
           setPlan((profileRes.data.plan as 'free' | 'pro' | 'accelerator') ?? 'free')

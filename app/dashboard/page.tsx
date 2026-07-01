@@ -1,5 +1,6 @@
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { RecentDocuments } from '@/components/dashboard/RecentDocuments'
+import { MasterCvCard } from '@/components/dashboard/MasterCvCard'
 import { FoundingMemberBanner } from '@/components/dashboard/FoundingMemberBanner'
 import { FoundingClaimCard } from '@/components/dashboard/FoundingClaimCard'
 import { FreeTierBanner } from '@/components/billing/FreeTierBanner'
@@ -114,6 +115,10 @@ export default async function DashboardPage() {
             {w.progress !== null && <Progress value={w.progress} className="h-1" />}
           </GlassCard>
         ))}
+      </div>
+
+      <div className="mb-8">
+        <MasterCvCard plan={plan} />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">

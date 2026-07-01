@@ -26,6 +26,11 @@ export interface User {
   created_at: string
 }
 
+export type CvType = 'uploaded' | 'default_master'
+export type CvGenerationStatus = 'generating' | 'ready' | 'failed'
+export type CvGenerationStage =
+  | 'queued' | 'parsing' | 'extracting' | 'market' | 'optimising' | 'scoring' | 'formatting' | 'ready'
+
 export interface CV {
   id: string
   user_id: string
@@ -35,6 +40,24 @@ export interface CV {
   ats_score: number | null
   version_label: string | null
   is_primary: boolean
+  cv_type?: CvType
+  is_default?: boolean
+  source_cv_id?: string | null
+  target_role?: string | null
+  target_market?: string | null
+  generation_status?: CvGenerationStatus | null
+  generation_stage?: CvGenerationStage | null
+  generation_error?: string | null
+  content_markdown?: string | null
+  generated_at?: string | null
+  display_name?: string | null
+  market_gaps?: string[] | null
+  job_family?: string | null
+  target_seniority?: string | null
+  ats_score_version?: string | null
+  market_spec_version?: string | null
+  membership_plan_at_generation?: string | null
+  last_regenerated_at?: string | null
   created_at: string
 }
 
