@@ -62,3 +62,6 @@ test-results/
 *.pyc
 __pycache__/
 __pycache__/*.pyc
+.env.example
+.env.local
+.env

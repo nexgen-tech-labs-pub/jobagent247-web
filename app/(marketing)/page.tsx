@@ -38,7 +38,7 @@ function HeroSection() {
             </h1>
             <p className="text-lg leading-relaxed mb-8" style={{ color: '#CBD5E1' }}>
               JobAgent247 runs 10+ specialised AI agents that score and rewrite your CV against any job description —
-              targeting a 90+ ATS score — match live roles from 50+ UK and Indian job sites, generate tailored
+              targeting a 90+ ATS score — match live roles from 50+ UK job sites, generate tailored
               applications, prepare you for interviews, and track your entire job search from one intelligent workspace.
             </p>
             <ul className="space-y-3 mb-10">

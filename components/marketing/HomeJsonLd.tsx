@@ -40,7 +40,7 @@ export function HomeJsonLd() {
         url: 'https://jobagent247.co',
         publisher: { '@id': 'https://jobagent247.co/#organization' },
         description:
-          'AI job-search platform with 10+ specialised agents that score and rewrite CVs against any job description (targeting a 90+ ATS score), match live roles from 50+ UK and Indian job sites, draft tailored cover letters, and prepare you for interviews.',
+          'AI job-search platform with 10+ specialised agents that score and rewrite CVs against any job description (targeting a 90+ ATS score), match live roles from 50+ UK job sites, draft tailored cover letters, and prepare you for interviews.',
         offers: PLANS.map((plan) => ({
           '@type': 'Offer',
           name: plan.name,
