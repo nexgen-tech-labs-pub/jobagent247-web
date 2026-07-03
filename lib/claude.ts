@@ -124,6 +124,106 @@ export async function generateMasterCVMarkdown(opts: {
   return text
 }
 
+const candidateProfileTool: Anthropic.Tool = {
+  name: 'candidate_profile',
+  description: 'Return the structured candidate profile extracted strictly from the CV text',
+  input_schema: {
+    type: 'object',
+    properties: {
+      skills: { type: 'array', items: { type: 'string' }, description: 'Distinct professional skills evidenced in the CV' },
+      tools: { type: 'array', items: { type: 'string' }, description: 'Tools/technologies/platforms named in the CV' },
+      job_titles: { type: 'array', items: { type: 'string' }, description: 'Job titles the candidate has held' },
+      industries: { type: 'array', items: { type: 'string' }, description: 'Industries/domains the candidate has worked in' },
+      years_experience: { type: ['number', 'null'], description: 'Total professional years of experience if derivable, else null' },
+      seniority: { type: ['string', 'null'], description: 'One of: junior, mid, senior, lead, principal, manager, director — or null' },
+      education: {
+        type: 'array',
+        items: { type: 'object', properties: { degree: { type: 'string' }, institution: { type: 'string' }, year: { type: ['string', 'null'] } }, required: ['degree', 'institution'] },
+      },
+      certifications: { type: 'array', items: { type: 'string' } },
+      achievements: { type: 'array', items: { type: 'string' }, description: 'Concise, quantified achievement/evidence bullets taken from the CV' },
+      visa_signal: { type: ['string', 'null'], description: 'Work-authorisation signal ONLY if explicitly stated in the CV, else null' },
+      confidence: { type: 'number', description: '0-100 overall confidence in this extraction given CV completeness' },
+    },
+    required: ['skills', 'tools', 'job_titles', 'industries', 'education', 'certifications', 'achievements', 'confidence'],
+  },
+}
+
+export interface ExtractedCandidateProfile {
+  skills: string[]
+  tools: string[]
+  job_titles: string[]
+  industries: string[]
+  years_experience: number | null
+  seniority: string | null
+  education: { degree: string; institution: string; year: string | null }[]
+  certifications: string[]
+  achievements: string[]
+  visa_signal: string | null
+  confidence: number
+}
+
+function strArray(v: unknown): string[] {
+  if (!Array.isArray(v)) return []
+  return v.filter((x): x is string => typeof x === 'string' && x.trim().length > 0).map((s) => s.trim())
+}
+
+// Coerce (possibly malformed) tool output into a safe, typed profile.
+export function normalizeExtractedProfile(raw: unknown): ExtractedCandidateProfile {
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>
+  const education = Array.isArray(r.education)
+    ? r.education
+        .filter((e): e is Record<string, unknown> => !!e && typeof e === 'object')
+        .map((e) => ({
+          degree: typeof e.degree === 'string' ? e.degree.trim() : '',
+          institution: typeof e.institution === 'string' ? e.institution.trim() : '',
+          year: typeof e.year === 'string' && e.year.trim() ? e.year.trim() : null,
+        }))
+        .filter((e) => e.degree || e.institution)
+    : []
+  const years = typeof r.years_experience === 'number' && isFinite(r.years_experience) ? r.years_experience : null
+  const confidence = typeof r.confidence === 'number' && isFinite(r.confidence)
+    ? Math.max(0, Math.min(100, Math.round(r.confidence)))
+    : 0
+  return {
+    skills: strArray(r.skills),
+    tools: strArray(r.tools),
+    job_titles: strArray(r.job_titles),
+    industries: strArray(r.industries),
+    years_experience: years,
+    seniority: typeof r.seniority === 'string' && r.seniority.trim() ? r.seniority.trim() : null,
+    education,
+    certifications: strArray(r.certifications),
+    achievements: strArray(r.achievements),
+    visa_signal: typeof r.visa_signal === 'string' && r.visa_signal.trim() ? r.visa_signal.trim() : null,
+    confidence,
+  }
+}
+
+export async function extractCandidateProfile(cvText: string, profileHints?: string): Promise<ExtractedCandidateProfile> {
+  const hints = profileHints ? `\n\nUser-provided profile context (may help disambiguate, do not treat as CV evidence):\n${profileHints}` : ''
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 2048,
+    system: [
+      {
+        type: 'text',
+        text: `You extract a structured candidate profile from CV text. Extract ONLY facts evidenced in the CV. Never invent skills, tools, employers, titles, education, certifications, achievements, years of experience, or work authorisation. If a field is not evidenced, return an empty array or null. Deduplicate and normalise casing. Achievements must be concrete, ideally quantified, and drawn verbatim-in-substance from the CV.\n\nCV text:\n${cvText}${hints}`,
+        cache_control: { type: 'ephemeral' },
+      },
+    ] as Anthropic.TextBlockParam[],
+    messages: [{ role: 'user', content: 'Extract the candidate profile using the candidate_profile tool.' }],
+    tools: [candidateProfileTool],
+    tool_choice: { type: 'tool', name: 'candidate_profile' },
+  })
+
+  const toolUse = response.content.find((b) => b.type === 'tool_use')
+  if (!toolUse || toolUse.type !== 'tool_use') {
+    throw new Error('Claude did not return a candidate_profile tool_use block')
+  }
+  return normalizeExtractedProfile(toolUse.input)
+}
+
 export async function* streamCVImprovement(
   cvText: string,
   jobDescription: string,

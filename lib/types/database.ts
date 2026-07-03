@@ -110,6 +110,39 @@ export interface Document {
   created_at: string
 }
 
+export interface EducationEntry {
+  degree: string
+  institution: string
+  year: string | null
+}
+
+export type CandidateProfileStatus = 'draft' | 'approved'
+
+// The structured, editable slice of a candidate profile (issue #52).
+export interface CandidateProfileData {
+  skills: string[]
+  tools: string[]
+  job_titles: string[]
+  industries: string[]
+  years_experience: number | null
+  seniority: string | null
+  education: EducationEntry[]
+  certifications: string[]
+  achievements: string[]
+  visa_signal: string | null
+}
+
+export interface CandidateProfile extends CandidateProfileData {
+  id: string
+  user_id: string
+  source_cv_id: string | null
+  confidence: number | null
+  status: CandidateProfileStatus
+  extracted_at: string | null
+  updated_at: string
+  created_at: string
+}
+
 export interface InterviewQuestion {
   id: string
   question: string
@@ -642,6 +675,7 @@ export interface Database {
       users: TableDef<User, Omit<User, 'created_at'>, Partial<Omit<User, 'id'>>>
       credit_transactions: TableDef<CreditTransaction, Omit<CreditTransaction, 'id' | 'created_at'>, never>
       cvs: TableDef<CV, Omit<CV, 'id' | 'created_at'>, Partial<Omit<CV, 'id'>>>
+      candidate_profiles: TableDef<CandidateProfile, Omit<CandidateProfile, 'id' | 'created_at' | 'updated_at'>, Partial<Omit<CandidateProfile, 'id' | 'user_id'>>>
       jobs: TableDef<Job, Omit<Job, 'id' | 'scraped_at'>, Partial<Omit<Job, 'id'>>>
       user_jobs: TableDef<UserJob, Omit<UserJob, 'id' | 'created_at'>, Partial<Omit<UserJob, 'id'>>>
       documents: TableDef<Document, Omit<Document, 'id' | 'created_at'>, Partial<Omit<Document, 'id'>>>

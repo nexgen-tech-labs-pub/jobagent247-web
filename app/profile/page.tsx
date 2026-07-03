@@ -6,6 +6,7 @@ import { GlassCard } from '@/components/ui/GlassCard'
 import { GradientButton } from '@/components/ui/GradientButton'
 import { Progress } from '@/components/ui/progress'
 import { CVUpload } from '@/components/profile/CVUpload'
+import { CandidateProfileSection } from '@/components/profile/CandidateProfileSection'
 import { getBrowserClient } from '@/lib/supabase-browser'
 import { Check, X, Plus, Zap, Loader2 } from 'lucide-react'
 import type { User, CV } from '@/lib/types/database'
@@ -337,6 +338,8 @@ export default function ProfilePage() {
             />
           )}
         </GlassCard>
+
+        <CandidateProfileSection />
 
         <GradientButton
           size="lg"

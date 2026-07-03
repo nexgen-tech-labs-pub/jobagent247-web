@@ -4,6 +4,7 @@ import { getUserBillingContext } from '@/lib/db/users'
 import { checkQuota } from '@/lib/rate-limit'
 import { streamCVImprovement } from '@/lib/claude'
 import { classifyRole, getRoleProfile } from '@/lib/db/role-profiles'
+import { getApprovedProfileContext } from '@/lib/db/candidate-profile'
 
 export async function POST(request: NextRequest) {
   const supabase = await createServerClient()
@@ -45,6 +46,12 @@ export async function POST(request: NextRequest) {
     if (profile) {
       roleContext = `Role knowledge base for ${profile.role_title}:\nKey tech stack: ${profile.tech_stack.join(', ')}\nCritical ATS keywords to include: ${profile.tech_stack.join(', ')}\nSkills gap focus areas: ${profile.learning_focus.join(', ')}`
     }
+  } catch { /* degrade gracefully */ }
+
+  // Enrich with the user-approved structured profile where available.
+  try {
+    const profileContext = await getApprovedProfileContext(supabase, user.id)
+    if (profileContext) roleContext = roleContext ? `${roleContext}\n\n${profileContext}` : profileContext
   } catch { /* degrade gracefully */ }
 
   const generator = streamCVImprovement(cv.raw_text, body.jobDescription, body.targetRole, roleContext)
